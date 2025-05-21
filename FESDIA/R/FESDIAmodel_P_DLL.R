@@ -25,7 +25,6 @@ initFESDIA <- function (parms = list(), gridtype = 1, CfluxForc = NULL,
 
   if (is.null(Grid))
     Grid  <- setup.grid.1D(x.up = 0, dx.1 = 0.01, N = .FESDIA$N, L = 100)
-    #Grid  <- setup.grid.1D(x.up = 0, dx.1 = 0.1, N = .FESDIA$N, L = 100)
   else {
     if (is.list (Grid)) {
       nms <- names(Grid)
@@ -184,11 +183,12 @@ initFESDIA <- function (parms = list(), gridtype = 1, CfluxForc = NULL,
                 "Cflux", "FeOH3flux", "CaPflux", "w", "pFast", 
                 "rFast", "rSlow", "pFast", "MPBprod","gasflux",
                 "O2bw","Febw","H2Sbw","SO4bw","NO3bw","NO2bw","NH3bw",
-                "PO4bw","CH4bw","DICbw","ALKbw","Hwater","rH2Sfeox", 
-                "Mnbw", "MnO2flux", "rAgeFeox","rMnOxid", "rH2SMnox", 
-                "rAgeMnox", "rMnFe","rMnS","rMnCO3prec", "rFeCO3prec", 
-                "ksMnO2", "kinMnO2", "ksNO3MnRed", "pFastFeOx", 
-                "pFastMnOx", "isDICcorr"
+                "PO4bw","CH4bw","DICbw","ALKbw","Hwater","rH2Sfeoxa", 
+                "rH2Sfeoxb", "Mnbw", "MnO2flux", "rAgeFeox","rMnOxid", 
+                "rH2SMnoxa", "rH2SMnoxb", "rAgeMnox", "rMnFe","rMnS",
+                "rMnCO3prec", "ksMnO2",  "pFastFeOx", 
+                "pFastMnOx", "rMnCO3dis", "ksPrec", "rMnSdiss", 
+                "rFeCO3prec", "rFeCO3dis", "kinMnO2"
   )
 
 #  if (dynamicpH) {  # other diffusion coefficients, and density
@@ -204,12 +204,14 @@ initFESDIA <- function (parms = list(), gridtype = 1, CfluxForc = NULL,
 
 # parameters to pass to model DLL
   initpar <- c(parms, Grid$dx, Grid$dx.aux, Grid$x.mid, Aint, porGrid$mid,  
-              porGrid$int, diffusionfactor, Db, Dirr, distreact, Parms[["rH2Sfeox"]], 
-  	          Parms[["rAgeFeox"]], Parms[["rMnOxid"]], Parms[["rH2SMnox"]], 
-  	          Parms[["rAgeMnox"]], Parms[["rMnFe"]], Parms[["rMnS"]], 
-              Parms[["rMnCO3prec"]], Parms[["rFeCO3prec"]],
-              Parms[["ksMnO2"]], Parms[["pFastFeOx"]], Parms[["pFastMnOx"]], 
-	      Parms[["kinMnO2"]], Parms[["isDICcorr"]]
+              porGrid$int, diffusionfactor, Db, Dirr, distreact, 
+              Parms[["rH2Sfeoxa"]], Parms[["rH2Sfeoxb"]],Parms[["rAgeFeox"]], 
+              Parms[["rMnOxid"]], Parms[["rH2SMnoxa"]], Parms[["rH2SMnoxb"]], 
+              Parms[["rAgeMnox"]], Parms[["rMnFe"]], Parms[["rMnS"]], 
+              Parms[["rMnCO3prec"]], Parms[["ksMnO2"]], Parms[["pFastFeOx"]], 
+              Parms[["pFastMnOx"]], Parms[["rMnCO3dis"]], Parms[["ksPrec"]], 
+              Parms[["rMnSdiss"]], Parms[["rFeCO3prec"]], Parms[["rFeCO3dis"]],
+              Parms[["kinMnO2"]]
               )
 
 
@@ -263,13 +265,13 @@ FESDIAsolve_Full <- function (parms = list(), yini = NULL, gridtype = 1, Grid = 
                    dynamicpH = dynamicpH, ...) 
      Att <- attributes(DIA)[-1]
      DIA <- DIA[2, -1]
-     SVAR <- DIA[1:(N*21)]
+     SVAR <- DIA[1:(N*27)]
      
      if (method == "runsteady"){  # finished
        SVNAMES  <- unique(names(SVAR))
-       STD  <- list(y = matrix(nrow = N, ncol = 21, data  = SVAR))
+       STD  <- list(y = matrix(nrow = N, ncol = 27, data  = SVAR))
        colnames(STD$y) <- SVNAMES
-       VAR <- DIA[-(1:(N*21))]
+       VAR <- DIA[-(1:(N*27))]
        OUT <- unique(names(VAR))
        Z <- lapply(OUT, FUN = function(x) {
         VV <- subset(VAR, names(VAR) == x)
@@ -336,7 +338,7 @@ FESDIAsolve_full <- function (parms = list(), gridtype = 1, CfluxForc = NULL,
                      
   initfunc <- "initfesdia"
   initforc <- "initfesforc"
-  nspec    <- 21
+  nspec    <- 27
   ynames   <- .FESDIA$ynames
   nout     <- .FESDIA$nout
   outnames <- .FESDIA$outnames
@@ -430,7 +432,7 @@ FESDIAsolve_full <- function (parms = list(), gridtype = 1, CfluxForc = NULL,
   lf <- as.list(forcings)
   forcings <- lapply(lf, FUN = function(x) cbind(t = c(0, Inf), v = x))
 
-    
+  
   ZZ <- c(ZZ, capture.output(suppressWarnings(   
      DIA  <- DLLfunc(y = as.double(Yini), func = func, initfunc = initfunc,
                     initforc = initforc, forcings = forcings, parms = P$initpar,
@@ -440,7 +442,8 @@ FESDIAsolve_full <- function (parms = list(), gridtype = 1, CfluxForc = NULL,
    attr(DIA,"message") <- ZZ 
    return(DIA)
   } 
-
+  
+  
   ZZ <- c(ZZ, capture.output(suppressWarnings(   
     DIA  <- steady.1D(y = Yini, func = func, initfunc = initfunc,
                      names = ynames, initforc = initforc,
@@ -452,9 +455,9 @@ FESDIAsolve_full <- function (parms = list(), gridtype = 1, CfluxForc = NULL,
   )))
   
   niter <- 1
-  y1 <- c(1e2, 1e4, 10, 5, 1, 1000, 10, 1e4,1e4,1e3,1,1e4,1e2,1e4,1e2,0,1e4,1e4, 1e4, 1e4, 1e4)
-  y2 <- c(1e1, 1e3, 100, 10, 10, 10, 1, 1e2,1e2,1e3,1e2,1e4,1,3e4,1,0,1e3,1e3, 1e2, 1e2, 1e2)
-# ("FDET","SDET","O2","NO3","NO2","NH3","DIC","Fe","FeOH3","H2S","SO4","CH4","PO4","FeP","CaP","Pads","ALK","FeOH3","Mn","MnO2","MnO2B")                 
+  y1 <- c(1e2, 1e4, 10, 5, 1, 1000, 10, 1e4,1e4,1e3,1,1e4,1e2,1e4,1e2,0,1e4,1e4, 1e4, 1e4, 1e4, 1e4, 1e4, 1e4, 1e2, 1e2, 1e2)
+  y2 <- c(1e1, 1e3, 100, 10, 10, 10, 1, 1e2,1e2,1e3,1e2,1e4,1,3e4,1,0,1e3,1e3, 1e2, 1e2, 1e2, 1e2, 1e2, 1e2, 1e1, 1e1, 1e1)
+# ("FDET","SDET","O2","NO3","NO2","NH3","DIC","Fe","FeOH3","H2S","SO4","CH4","PO4","FeP","CaP","Pads","ALK","FeOH3","Mn","MnO2","MnO2B", "FeS", "FeS2", "S0", "MnCO3", "FeCO3", "MnS")                 
 
   while (! attributes(DIA)$steady & niter <= 50 & method != "runsteady")  {
    if (Random) {
@@ -637,7 +640,7 @@ FESDIAdyna_Full <- function (parms = list(), times = 0:365, spinup = NULL, yini 
 
   if (is.null(spinup)) Times <- times else Times <- spinup
   
-  nspec <- 21 
+  nspec <- 27 
   ynames <- .FESDIA$ynames
   initfunc <- "initfesdia"
   initforc <- "initfesforc"
@@ -706,7 +709,7 @@ FESDIAdyna_Full <- function (parms = list(), times = 0:365, spinup = NULL, yini 
   }
   if (dynamicpH) func <- "phdiamod"
   
-  lrw <- 250000
+  lrw <- 500000
   if(STD$isDistReact | dynamicpH) lrw <- 500000
   
   if(length(yini) != nspec*N)

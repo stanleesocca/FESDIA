@@ -24,15 +24,16 @@
 !......................... declaration section.............................
       INTEGER           :: neq, ip(*), i
 
-      DOUBLE PRECISION  :: t,Conc(21*NP1),dConc(21*NP1),yout(*)
+      DOUBLE PRECISION  :: t,Conc(26*NP1),dConc(26*NP1),yout(*)
       DOUBLE PRECISION ::  FdetBW, SdetBW, O2BW, NO3BW, NO2bw, NH3bw,            &
      &                PO4bw,FePBW, CaPBW, DICbw, FeBW, FeOH3bw, H2Sbw,           &
      &                SO4bw, CH4bw, Padsbw, ALKbw, FeOH3BBW, Mnbw, 		    &
-     &		        MnO2bw, MnO2Bbw
+     &		        MnO2bw, MnO2Bbw, FeSbw, FeS2bw, S0bw, MnCO3bw, FeCO3BW
       DOUBLE PRECISION :: dFdetBW,dSdetBW,dO2BW,dNO3BW,dNO2BW,dNH3BW,            &
      &                dDICbw,dFeBW,dFeOH3bw,dH2Sbw,dSO4bw,dCH4bw,                &
      &                dPO4BW,dFePBW,dCaPBW,dPadsbw,dALKbw,dFeOH3BBW,		    &
-     &		        dMnbw, dMnO2bw, dMnO2Bbw     
+     &		        dMnbw, dMnO2bw, dMnO2Bbw, dFeSbw, dFeS2bw, dS0bw,          &
+     &                dMnCO3bw, dFeCO3BW    
 
       DOUBLE PRECISION :: pF, FDETdepo, SDETdepo, FePdepo, CaPdepo,              &
      &                    FeOH3depo, FePflux, MnO2depo
@@ -47,49 +48,59 @@
 
 ! from Conc to fdet, sdet, o2,...
        DO I = 1, N
-        Fdet(I) = Conc(       1+I)
-        Sdet(I) = Conc(   Np1+1+I)
-        O2(I)   = Conc( 2*Np1+1+I)
-        NO3(I)  = Conc( 3*Np1+1+I)
-        NO2(I)  = Conc( 4*Np1+1+I)
-        NH3(I)  = Conc( 5*Np1+1+I)
-        DIC(I)  = Conc( 6*Np1+1+I)
-        Fe(I)   = Conc( 7*Np1+1+I)
-        FeOH3(I)= Conc( 8*Np1+1+I)
-        H2S(I)  = Conc( 9*Np1+1+I)
-        SO4(I)  = Conc(10*Np1+1+I)
-        CH4(I)  = Conc(11*Np1+1+I)
-        PO4(I)  = Conc(12*Np1+1+I)
-        FeP(I)  = Conc(13*Np1+1+I)
-        CaP(I)  = Conc(14*Np1+1+I)
-        Pads(I) = Conc(15*Np1+1+I)
-        ALK(I)  = Conc(16*Np1+1+I)
-	FeOH3B(I)=Conc(17*Np1+1+I)
-	Mn(I)    =Conc(18*Np1+1+I)
-	MnO2(I)  =Conc(19*Np1+1+I)
-	MnO2B(I) =Conc(20*Np1+1+I)
+        Fdet(I)   = Conc(       1+I)
+        Sdet(I)   = Conc(   Np1+1+I)
+        O2(I)     = Conc( 2*Np1+1+I)
+        NO3(I)    = Conc( 3*Np1+1+I)
+        NO2(I)    = Conc( 4*Np1+1+I)
+        NH3(I)    = Conc( 5*Np1+1+I)
+        DIC(I)    = Conc( 6*Np1+1+I)
+        Fe(I)     = Conc( 7*Np1+1+I)
+        FeOH3(I)  = Conc( 8*Np1+1+I)
+        H2S(I)    = Conc( 9*Np1+1+I)
+        SO4(I)    = Conc(10*Np1+1+I)
+        CH4(I)    = Conc(11*Np1+1+I)
+        PO4(I)    = Conc(12*Np1+1+I)
+        FeP(I)    = Conc(13*Np1+1+I)
+        CaP(I)    = Conc(14*Np1+1+I)
+        Pads(I)   = Conc(15*Np1+1+I)
+        ALK(I)    = Conc(16*Np1+1+I)
+	FeOH3B(I)  = Conc(17*Np1+1+I)
+	Mn(I)      = Conc(18*Np1+1+I)
+	MnO2(I)    = Conc(19*Np1+1+I)
+	MnO2B(I)   = Conc(20*Np1+1+I)
+       FeS(I)     = Conc(21*Np1+1+I)
+       FeS2(I)    = Conc(22*Np1+1+I)
+       S0(I)      = Conc(23*Np1+1+I)
+       MnCO3(I)   = Conc(24*Np1+1+I)
+       FeCO3(I)   = Conc(25*Np1+1+I)
        ENDDO
-       Fdetbw = Conc(       1)
-       Sdetbw = Conc(   Np1+1)
-       O2bw   = Conc( 2*Np1+1)
-       NO3bw  = Conc( 3*Np1+1)
-       NO2bw  = Conc( 4*Np1+1)
-       NH3bw  = Conc( 5*Np1+1)
-       DICbw  = Conc( 6*Np1+1)
-       Febw   = Conc( 7*Np1+1)
-       FeOH3bw= Conc( 8*Np1+1)
-       H2Sbw  = Conc( 9*Np1+1)
-       SO4bw  = Conc(10*Np1+1)
-       CH4bw  = Conc(11*Np1+1)
-       PO4bw  = Conc(12*Np1+1)
-       FePbw  = Conc(13*Np1+1)
-       CaPbw  = Conc(14*Np1+1)
-       Padsbw = Conc(15*Np1+1)
-       Alkbw  = Conc(16*Np1+1)
-       FeOH3BBW=Conc(17*Np1+1)
-       Mnbw    =Conc(18*Np1+1)
-       MnO2bw  =Conc(19*Np1+1)
-       MnO2Bbw =Conc(20*Np1+1)
+       Fdetbw   = Conc(       1)
+       Sdetbw   = Conc(   Np1+1)
+       O2bw     = Conc( 2*Np1+1)
+       NO3bw    = Conc( 3*Np1+1)
+       NO2bw    = Conc( 4*Np1+1)
+       NH3bw    = Conc( 5*Np1+1)
+       DICbw    = Conc( 6*Np1+1)
+       Febw     = Conc( 7*Np1+1)
+       FeOH3bw  = Conc( 8*Np1+1)
+       H2Sbw    = Conc( 9*Np1+1)
+       SO4bw    = Conc(10*Np1+1)
+       CH4bw    = Conc(11*Np1+1)
+       PO4bw    = Conc(12*Np1+1)
+       FePbw    = Conc(13*Np1+1)
+       CaPbw    = Conc(14*Np1+1)
+       Padsbw   = Conc(15*Np1+1)
+       Alkbw    = Conc(16*Np1+1)
+       FeOH3BBW = Conc(17*Np1+1)
+       Mnbw     = Conc(18*Np1+1)
+       MnO2bw   = Conc(19*Np1+1)
+       MnO2Bbw  = Conc(20*Np1+1)
+       FeSbw    = Conc(21*Np1+1)
+       FeS2bw   = Conc(22*Np1+1)
+       S0bw     = Conc(23*Np1+1)
+       MnCO3bw  = Conc(24*Np1+1)
+       FeCO3bw  = Conc(25*Np1+1)
 ! --------------------------------------------------------------------------
        FDETFLux = Carbonflux*pFast
        SDETflux = Carbonflux - FDETflux
@@ -107,7 +118,7 @@
 
        CALL FESDIAtransolid(FDETdepo,SDETdepo,FePdepo,0.D0,                     &
      &                      FeOH3depo,CaPdepo,FeOH3depo, MnO2depo,              &
-     &                      MnO2depo)
+     &                      MnO2depo, 0.D0, 0.D0, 0.D0, 0.D0, 0.D0)
 
        if (Hwater > 0) THEN
        FePflux = 0.d0
@@ -121,17 +132,27 @@
 	dFeOH3BBW = (FeOH3flux- FeOH3depo )/ Hwater
 	dMnO2BW   = (MnO2flux - MnO2depo )/ Hwater
 	dMnO2BBW  = (MnO2flux - MnO2depo )/ Hwater
+       ! dFeSBW    = (FeSflux - MnO2depo )/ Hwater
+       ! dFeS2BW   = (FeSflux - MnO2depo )/ Hwater
+       ! dS0BW     = (FeSflux - MnO2depo )/ Hwater
+       ! dMnCO3BW  = (FeSflux - MnO2depo )/ Hwater
+       ! dFeCO3BW  = (FeSflux - MnO2depo )/ Hwater
        ELSE
         dFDETBW = 0.D0
         dSDETBW = 0.D0
         dFePBW  = 0.D0
         dFeOH3BW  = 0.D0
         dCaPBW  = 0.D0
-	dFeOH3BBW = 0.D0
-	dMnO2BW = 0.D0
-	dMnO2BBW = 0.D0
+	 dFeOH3BBW = 0.D0
+	 dMnO2BW = 0.D0
+	 dMnO2BBW = 0.D0
        ENDIF
-       dPadsBW = 0.D0
+       dPadsBW   = 0.D0
+       dFeSBW    = 0.D0
+       dFeS2BW   = 0.D0
+       dS0BW     = 0.D0
+       dMnCO3BW  = 0.D0
+       dFeCO3BW  = 0.D0
        
        CALL FESDIAtranliquid(O2bw, NO3bw, NO2bw, NH3bw, CH4bw, PO4bw,            &
      &                      Febw, H2Sbw, SO4bw, DICbw, ALKbw, Mnbw)
@@ -193,6 +214,11 @@
 	 dConc(18*NP1+1+I) =  dMn(I)
 	 dConc(19*NP1+1+I) =  dMnO2(I)
 	 dConc(20*NP1+1+I) =  dMnO2B(I)
+        dConc(21*NP1+1+I) =  dFeS(I)
+        dConc(22*NP1+1+I) =  dFeS2(I)
+        dConc(23*NP1+1+I) =  dS0(I)
+        dConc(24*NP1+1+I) =  dMnCO3(I)
+        dConc(25*NP1+1+I) =  dFeCO3(I)
        ENDDO 
        dConc(       1) =  dFdetBW
        dConc(   NP1+1) =  dSdetBW
@@ -215,6 +241,11 @@
        dConc(18*NP1+1) =  dMnBW
        dConc(19*NP1+1) =  dMnO2BW
        dConc(20*NP1+1) =  dMnO2BBW
+       dConc(21*NP1+1+I) =  0.D0 
+       dConc(22*NP1+1+I) =  0.D0 
+       dConc(23*NP1+1+I) =  0.D0 
+       dConc(24*NP1+1+I) =  0.D0 
+       dConc(25*NP1+1+I) =  0.D0 
 
       END SUBROUTINE fesdiamodBW
 

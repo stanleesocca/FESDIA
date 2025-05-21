@@ -12,14 +12,14 @@
       MODULE dimFESDIA
         IMPLICIT NONE
         INTEGER, PARAMETER :: N = 100, Np1 = N+1
-        INTEGER, PARAMETER :: nparmsdia = 5*N + 5*(N+1) + 85
+        INTEGER, PARAMETER :: nparmsdia = 5*N + 5*(N+1) + 90
         INTEGER, PARAMETER :: nforcsdia = 26
         INTEGER, PARAMETER :: nparmspH = 14
         INTEGER, PARAMETER :: nforcspH = 3 
   
         INTEGER, PARAMETER :: nparms = nparmsdia + nparmspH
         INTEGER, PARAMETER :: nforc  = nforcsdia + nforcspH
-        INTEGER, PARAMETER :: Noutdia = 114 + 4400 
+        INTEGER, PARAMETER :: Noutdia = 117 + 4400 
   
         LOGICAL ::  DynamicpH 
   
@@ -39,11 +39,15 @@
         DOUBLE PRECISION  :: DIC(N),Fe(N),FeOH3(N),H2S(N),SO4(N),CH4(N)
         DOUBLE PRECISION  :: PO4(N),FeP(N),CaP(N),Pads(N),ALK(N)
         DOUBLE PRECISION	:: Mn(N), MnO2(N), MnO2B(N), FeOH3B(N)
+        DOUBLE PRECISION :: FeS(N), FeS2(N), S0(N), MnCO3(N), FeCO3(N)
+        DOUBLE PRECISION :: MnS(N)
   
-        DOUBLE PRECISION  :: dFdet(N),dSdet(N),dO2(N),dNO3(N),dNO2(N),            &
-     &              dNH3(N),dDIC(N),dFe(N),dFeOH3(N),dH2S(N),dSO4(N),             &     
-     &              dCH4(N),dPO4(N),dFeP(N),dCaP(N),dPads(N),dALK(N),             &
-     &              dFeOH3B(N),dMn(N),dMnO2(N),dMnO2B(N)
+        DOUBLE PRECISION  :: dFdet(N),dSdet(N),dO2(N),dNO3(N),dNO2(N),                &
+     &                  dNH3(N),dDIC(N),dFe(N),dFeOH3(N),dH2S(N),                     &
+     &                  dSO4(N), dCH4(N),dPO4(N),dFeP(N),dCaP(N),                     &
+     &                  dPads(N),dALK(N), dFeOH3B(N),dMn(N),dMnO2(N),                 &
+     &                  dMnO2B(N), dFeS(N), dFeS2(N), dMnCO3(N),dS0(N),               &
+     &                  dFeCO3(N), dMnS(N)
   
   ! -----------------------------------
   ! parameters
@@ -77,7 +81,7 @@
      &  rCaPprod, rCaPdiss, CPrCaP, ksFeOH3, kinFeOH3, ksSO4,                      &
      &  kinSO4, rFeOx, rH2Sox, rFeS, rCH4ox, rAOM, rH2Soxsurf,                     &
      &  rCH4oxsurf, ksALK, ksO2reox, relax, Cfall, FePfall, FeOH3fall,             &
-     &  CaPfall,rH2Sfeox
+     &  CaPfall,rH2Sfeoxa, rH2Sfeoxb 
   
   ! diffusion coefficients     
         DOUBLE PRECISION :: DispO2, DispNO3, DispNO2, DispNH3, DispPO4,            &
@@ -88,14 +92,14 @@
         DOUBLE PRECISION :: kMPB, ksDIN, ksPO4, ksDIC
   
   ! rate coefficients for Fe - Mn cycle 
-        DOUBLE PRECISION :: rAgeFeox, rMnOxid, rH2SMnox, rAgeMnox,          	   &
-     &	rMnFe, rMnS, rMnCO3prec, ksMnO2, pFastFeOx, pFastMnOx, 
-     &    rFeCO3prec
+        DOUBLE PRECISION :: rAgeFeox, rMnOxid, rH2SMnoxa, rH2SMnoxb,               &
+     &    rAgeMnox, rMnFe, rMnS, rMnCO3prec, ksMnO2, pFastFeOx,                    &
+     &    pFastMnOx 
 
-   ! switch for DIC correction 
-        LOGICAL :: isDICcorr
+  ! rate terms for Solid mineral process
+        DOUBLE PRECISION :: rMnCO3dis, ksPrec, rMnSdiss, rFeCO3prec,                & 
+     &   rFeCO3dis,  kinMnO2
 
-        DOUBLE PRECISION :: kinMnO2 
   
   ! Parameters relating to pH dynamics
         DOUBLE PRECISION :: rCaDiss    ! /d   Carbonate dissolution rate
@@ -125,9 +129,10 @@
      &  DispO2, DispNO3, DispNO2, DispNH3, DispPO4, DispCH4, DispDIC,              &
      &  DispFe, DispH2S, dispSO4, DispAlk, DispMn, DispHCO3, DispCO3,              &
      &  DispCa, dens, temp, Sal, dx, dxint, x, Aint, por, intpor,                  &
-     &  porfac, Db0, Dirr0, distreact, rH2Sfeox, rAgeFeox,                         &
-     &  rMnOxid, rH2SMnox, rAgeMnox, rMnFe, rMnS, rMnCO3prec,rFeCO3prec,           &
-     &  ksMnO2, pFastFeOx, pFastMnOx, kinMnO2,isDICcorr
+     &  porfac, Db0, Dirr0, distreact, rH2Sfeoxa, rH2Sfeoxb, rAgeFeox,             &
+     &  rMnOxid, rH2SMnoxa, rH2SMnoxb, rAgeMnox, rMnFe, rMnS,                      &
+     &  rMnCO3prec,ksMnO2,pFastFeOx, pFastMnOx, rMnCO3dis, ksPrec,                 &
+     &  rMnSdiss, rFeCO3prec, rFeCO3dis, kinMnO2
   
   ! -----------------------------------
   ! forcings
@@ -135,7 +140,7 @@
   
         DOUBLE PRECISION CarbonFlux,BWO2,bwNO3,bwNO2,bwNH3,bwCH4,bwFe,            &
      &   bwH2S,bwSO4,bwPO4,bwDIC,bwALK,w,biotfac,irrfac,rFast,rSlow,              &
-     &   pFast,FeOH3flux,CaPflux, gasflux,MPBforc,Hwater, ratefac,	              &
+     &   pFast,FeOH3flux,CaPflux, gasflux,MPBforc,Hwater, ratefac,	            &
      &	bwMn,MnO2flux 
   
   ! Forcings relating to pH dynamics
@@ -192,12 +197,15 @@
      &  MnOxid(N), MnSprod(N), MnredMin(N), Mnredlim(N), FeCO3prec(N)
   
        ! Fe-Mn-S Additional output variable 
-        DOUBLE PRECISION :: sumMnO2(N), sumFeOH3(N), FeOxidMnASC(N),             &
-     &   H2SOxidFeOH3ASC(N), H2SoxidMnO2ASC(N), TotMnred, TotMnOxid,             &
-     &   TotMnSprod, TotMnASC, TotFeASC,totH2SoxidFe, totH2SoxidMn,              &
-     &   TotMnCO3prec, TotAgeFeox, TotAgeMnox, TotMn, TotMnO2,                   &
-     &   partMnred, TotFeOxidMnASC
+        DOUBLE PRECISION :: sumMnO2(N), sumFeOH3(N), FeOxidMnASC(N),              &
+     &   H2SOxidFeOH3ASC(N), H2SoxidMnO2ASC(N), TotMnred, TotMnOxid,              &
+     &   TotMnSprod, TotMnASC, TotFeASC,totH2SoxidFe, totH2SoxidMn,               &
+     &   TotMnCO3prec, TotAgeFeox, TotAgeMnox, TotMn, TotMnO2,                    &
+     &   partMnred, TotFeOxidMnASC, FeCO3dis(N), MnCO3dis(N),                     &
+     &   FeS2prod(N), FeSprodS0(N), MnSdiss(N),TotFeCO3prec,                      &
+     &   TotMnCO3dis, TotFeCO3dis, FeSoxid(N)
   
+
         COMMON /myoutFES/O2flux, O2deepflux, NO3flux, NO3deepflux,                &
      &  NO2flux, NO2deepflux, NH3flux, NH3deepflux,                               &
      &  PO4flux, PO4deepflux, DICflux, DICdeepflux, Feflux,                       &
@@ -219,7 +227,8 @@
      &  MnO2deepflux, MnO2Bsurfflux,MnO2Bdeepflux, TotMnred, TotMnOxid,           &                         
      &  TotMnSprod, TotMnASC, TotFeASC, totH2SoxidFe, totH2SoxidMn,               &
      &  TotAgeMnox, TotAgeFeox, TotMnCO3prec, TotMn, TotMnO2,                     &
-     &  partMnred, TotFeOxidMnASC,                                                &      ! end of 0D output  variables                                                 
+     &  partMnred,  TotFeOxidMnASC, TotFeCO3prec, TotMnCO3dis,                    &
+     &  TotFeCO3dis,                                                              &      ! end of 0D output  variables                              
      &  TOC, Cprod, Nprod, Pprod, O2prod, Oxicmin, Denitrific, Feredmin,          &      ! 28/7/22 - Think about whether to add TotFeCO3 as diagnostic variable 
      &  BSRmin, MethMin, nitri1, nitri2, Anammox, Feoxid, H2Soxid,                &
      &  CH4oxid, AOM, FeSprod, FePadsorp, FePdesorp, CaPprod, CaPdiss,            &
@@ -250,7 +259,7 @@
         DOUBLE PRECISION :: Rescale(N), mPads
         DOUBLE PRECISION :: Sum, TotalO2, pO2(N)
         INTEGER :: I,J
-        REAL:: DICcorr = 0.85 ! DIC correction for calcium precip
+        REAL:: DICcorr = 0.7 ! DIC correction for calcium precip
         REAL :: CH4sat = 6361.854 ! CH4 solubility (mmol/m3) calculated from marelac
         REAL :: CH4gas(N)
 
@@ -271,13 +280,13 @@
       Mnredlim  = (1.d0-O2/(O2+kinO2denit))*(1.d0-NO3/(NO3+ksNO3denit))*          &
      &	   	(MnO2/(MnO2+ksMnO2))	       
       Feredlim  = (1.d0-O2/(O2+kinO2denit))*                                      &
-     &         (1.d0-NO3/(NO3+ksNO3denit))*(1.d0-MnO2/(MnO2+kinMnO2))*	        &
+     &         (1.d0-NO3/(NO3+ksNO3denit))*(1.d0-MnO2/(MnO2+kinMnO2))*	            &
      &		(FeOH3/(FEOH3+ksFEOH3))
       BSRlim    = (1.d0-O2/(O2+kinO2anox))*(1.d0-NO3/(NO3+kinNO3anox))*           &
-     &       (1.d0-MnO2/(MnO2+kinMnO2))*(1.D0-FeOH3/(FeOH3+kinFeOH3)) * 	        &
+     &       (1.d0-MnO2/(MnO2+kinMnO2))*(1.D0-FeOH3/(FeOH3+kinFeOH3)) * 	       &
      &		(SO4/ (SO4 + ksSO4))
       Methlim= (1.d0-O2/(O2+kinO2anox))*(1.d0-NO3/(NO3+kinNO3anox))*              &
-     &         (1.d0-MnO2/(MnO2+kinMnO2))*(1.D0-FeOH3/(FeOH3+kinFeOH3))*		      &
+     &         (1.d0-MnO2/(MnO2+kinMnO2))*(1.D0-FeOH3/(FeOH3+kinFeOH3))*		  &
      &	       (1.D0-SO4/(SO4+kinSO4))
    
       Rescale   = 1.d0/(Oxicminlim+Denitrilim+Mnredlim+Feredlim+BSRlim+           &
@@ -301,53 +310,34 @@
          CH4oxid    = rCH4ox * CH4 * O2
          AOM        = rAOM   * CH4 * SO4
   ! New addition process for Fe and a new pool of oxide (FeOxB)        
-         H2SoxidFeoxA = rH2Sfeox * H2S * FeOH3
-         H2SoxidFeoxB = rH2Sfeox * H2S * FeOH3B
+         H2SoxidFeoxA = rH2Sfeoxa * H2S * FeOH3
+         H2SoxidFeoxB = rH2Sfeoxb * H2S * FeOH3B
          AgeFeOx      = rAgeFeox * FeOH3
   
   ! New addition for Maganese cycle 
-         MnOxid       = rMnOxid * Mn * O2		! Oxidation of Mn 
-         H2SoxidMnO2A = rH2SMnox * H2S * MnO2	! Reoxidation of H2S with FeOx
-         H2SoxidMnO2B = rH2SMnox * H2S * MnO2B	! Reoxidation of H2S with FeOx
-         AgeMnOx 	    = rAgeMnox * MnO2		! Ageing of Iron oxide
-        !  FeOxidMn     = max(1D-8,rMnFe * MnO2 * Fe)! Reoxidation of Fe with MnOx
-        !  FeOxidMnB    = max(1D-8,rMnFe * MnO2B * Fe)! Reoxidation of Fe with MnOx
-        !  MnSprod      = max(1D-8,rMnS * Mn * H2S)	! precipitation of MnS 
-         FeOxidMn     = rMnFe * MnO2 * Fe ! Reoxidation of Fe with MnOx
-         FeOxidMnB    = rMnFe * MnO2B * Fe! Reoxidation of Fe with MnOx
-         MnSprod      = rMnS * Mn * H2S	! precipitation of MnS 
-         MnCO3prec    = rMnCO3prec * Mn * DIC	! precipation of MnCO3 with Mn
-         FeCO3prec    = rFeCO3prec * Fe * DIC	! precipation of FeCO3 with Fe 
-  ! precipitation of FeS
-         FeSprod    = rFeS * Fe * H2S
+         MnOxid       = rMnOxid * Mn * O2		
+         H2SoxidMnO2A = rH2SMnoxa * H2S * MnO2	
+         H2SoxidMnO2B = rH2SMnoxb * H2S * MnO2B	
+         AgeMnOx      = rAgeMnox * MnO2		
+         FeOxidMn     = rMnFe * MnO2 * Fe 
+         FeOxidMnB    = rMnFe * MnO2B * Fe
+
+
+         FeSprod    = rFeS * Fe * H2S   
+         MnSprod    = rMnS * Mn * H2S
+         MnSdiss    = rMnSdiss * MnS	 
+         FeS2prod   = rFeS * FeS * H2S   
+         FeSprodS0  = rFeS * S0 * FeS   
+
+          ! simple formulation 
+         MnCO3prec = rMnCO3prec * Mn * DIC 	! precipation of MnCO3 with Mn
+         FeCO3prec = rFeCO3prec * Fe * DIC 	! precipation of FeCO3 with Fe 
+         MnCO3dis  = rMnCO3dis * MnCO3
+         FeCO3dis  = rFeCO3dis * FeCO3
+         FeSoxid   = 1e-3 * FeS * O2
+
+         CH4gas = max(0.d0, 0.5 * (CH4 - CH4sat))
   
-
-!   New addition on methane solubility: 13-Jan-2023
-!        CH4gas(:) = 0.d0
-
-!        CH4gas = 200/365 * max(0.d0, ((CH4/CH4sat) - 1.d0))
-!         do i = 1, N 
-!            if ((CH4(i) / CH4sat) > 1.d0) then 
-!               CH4gas(i) = CH4sat
-!            else
-!              CH4gas(i) = 0.d0 
-!            end if
-!         end do         
-
-!      do i = 1, N 
-!        if (CH4(i) < CH4sat) then 
-!                CH4gas(i) = 0.d0
-!                CH4(i) = CH4(i)
-!        else 
-!                CH4gas(i) = 20/365 * (CH4(i) - CH4sat)
-!                CH4(i) = CH4(i) - (CH4(i) - CH4sat)
-!        end if
-!      end do
-
-
-!      CH4gas = 200/365 * (CH4/CH4sat - 1) * CH4
-      CH4gas = max(0.d0, 0.5 * (CH4 - CH4sat))
-      
          pO2(:) = 0.D0
          IF (rH2Soxsurf + rCH4oxsurf .GT. 0) THEN ! long-distance reoxidation
           TotalO2 = 0.D0
@@ -443,7 +433,8 @@
          dSDET = dSDET  - rSlow*SDET*ratefac
         
          dO2   = dO2    - OxicMin -1.5d0* Nitri1 - 0.5D0* Nitri2                  &
-     &                - 0.25*Feoxid - 2*H2Soxid - 2*CH4oxid - 0.5*MnOxid 
+     &                - 0.25*Feoxid - 2*H2Soxid - 2*CH4oxid - 0.5*MnOxid          &
+     &                - 2*FeSoxid* (1.d0-por)/por
        
          dNH3  = dNH3  +  (Nprod - Nitri1 - Anammox)  / (1.d0+NH3Ads)
        
@@ -453,18 +444,14 @@
   
          DICprodCH4 = - 0.5D0*MethMin + CH4oxid + AOM  
   
+         !dCH4  = dCH4  - DICprodCH4
          dCH4  = dCH4  - DICprodCH4 - CH4gas 
        
-         if (.not. isDICcorr) then 
-           dDIC  = dDIC  + Cprod + DICprodCH4  +                                      &
-     &              CPrCaP*(CaPdiss*(1.d0-por)/por-CaPprod)                     &
-     &         - MnCO3prec - FeCO3prec
-         else 
-        dDIC  = dDIC  + DICcorr*(Cprod + DICprodCH4  +                                      &
-     &                 CPrCaP*(CaPdiss*(1.d0-por)/por))                                  &
-     &         - CPrCap*CaPprod - MnCO3prec - FeCO3prec
-        end if
-
+        dDIC  = dDIC  + Cprod + DICprodCH4  +                                      &
+     &                 CPrCaP*(CaPdiss*(1.d0-por)/por-CaPprod)                     &
+     &         - MnCO3prec - FeCO3prec + MnCO3dis * (1.d0-por)/por                 &
+     &         + FeCO3dis * (1.d0-por)/por
+       
          dPO4  = dPO4  + Pprod + FePdesorp - NetadsorpP                            &
      &                - FePadsorp - CaPprod + CaPdiss*(1.d0-por)/por 
        
@@ -474,31 +461,49 @@
          
          dFe   = dFe   + 4.d0*FeredMin  - Feoxid - FeSprod +                       &
      &       2.D0*(H2SoxidFeoxA + H2SoxidFeoxB)*(1.d0-por)/por -	                  &
-     &		     (FeOxidMn + FeOxidMnB)*(1.d0-por)/por - FeCO3prec
+     &		     (FeOxidMn + FeOxidMnB)*(1.d0-por)/por - FeCO3prec              &
+     &         + FeCO3dis * (1.d0-por)/por + FeSoxid * (1.d0-por)/por
   
          dFeOH3= dFeOH3+ (FeOxid -4.d0*FeredMin) * por/(1.d0-por)-	             &
      &			 2.D0*H2SoxidFeoxA - AgeFeOx + (FeOxidMn + FeOxidMnB)
          
          dH2S  = dH2S  + 0.5D0 *BSRMin - H2Soxid - FeSprod + AOM -	             &
      &		(H2SoxidFeoxA + H2SoxidFeoxB)*(1.d0-por)/por -                      &
-     &    (H2SoxidMnO2A+H2SoxidMnO2B)*(1.d0-por)/por - MnSprod
+     &    (H2SoxidMnO2A+H2SoxidMnO2B)*(1.d0-por)/por - MnSprod -                   &
+     &    FeS2prod * (1.d0-por)/por  + MnSdiss * (1.d0-por)/por               
          
-         dSO4  = dSO4   -0.5D0 *BSRMin + H2Soxid           - AOM
+         dSO4  = dSO4   -0.5D0 *BSRMin + H2Soxid - AOM                              &
+     &          + FeSoxid*(1.d0-por)/por
          
          dPads = dPads  + NetadsorpP*por/(1.d0-por)
   
          dFeOH3B = dFeOH3B - 2.D0*H2SoxidFeoxB + AgeFeOx 
   
          dMn = dMn + 2.d0*MnredMin-MnOxid+(H2SoxidMnO2A+H2SoxidMnO2B) *            &
-     &  (1.d0-por)/por - MnSprod - MnCO3prec   +                                   &
-     &	0.5d0*(FeOxidMn + FeOxidMnB)*(1.d0-por)/por
+     &        (1.d0-por)/por - MnSprod - MnCO3prec   +                             &
+     &	    0.5d0*(FeOxidMn + FeOxidMnB)*(1.d0-por)/por +                        &
+     &        MnSdiss * (1.d0-por)/por + MnCO3dis * (1.d0-por)/por
   
          dMnO2 = dMnO2 + (-2.d0*MnredMin + MnOxid)*por/(1.d0 -por) - 	 	        &
-     &		H2SoxidMnO2A - AgeMnOx - 0.5d0*FeOxidMn
+     &		H2SoxidMnO2A - AgeMnOx - 0.5d0*FeOxidMn 
   
          dMnO2B = dMnO2B - H2SoxidMnO2B + AgeMnOx - 0.5d0*FeOxidMnB
+
+         dS0 = dS0 + (H2SoxidFeoxA + H2SoxidFeoxB) - FeSprodS0 +                   &
+     &    (H2SoxidMnO2A+H2SoxidMnO2B)  
   
-  !       dFeS    = dFeS + FeSprod*por/(1-por) +  (H2Soxid_FeoxA + H2Soxid_FeoxB)   
+         dFeS = dFeS + FeSprod*por/(1-por) - FeSprodS0 - FeS2prod             &
+     &         - FeSoxid
+
+         dFeS2 = dFeS2  + FeSprodS0 + FeS2prod 
+
+         dMnCO3 = dMnCO3 + MnCO3prec*por/(1.d0 -por) - MnCO3dis
+
+         dFeCO3 = dFeCO3 + FeCO3prec*por/(1.d0 -por) - FeCO3dis
+
+         dMnS = dMnS + MnSprod * por/(1.d0 - por) - MnSdiss
+
+
   
   ! longdistance HSoxidation: effect on alkalinity is split in two parts
   ! O2 + 4e + 4H+ -> 2H2O                  dALK = +4 (per mmol O)   OR +8 per mmol S
@@ -538,7 +543,8 @@
      &    -2.0*MnOxid - 1.0*(FeOxidMn+FeOxidMnB)*(1.d0-por)/por                     &
      &   + 2.0*(H2SoxidMnO2A + H2SoxidMnO2B)*(1.d0-por)/por                         &
      &   + 4.0*(H2SoxidFeoxA + H2SoxidFeoxB)*(1.d0-por)/por                         &
-     &    - 2.0*MnCO3prec - 2.0*MnSprod - 2.0*FeCO3prec
+     &    - 2.0*MnCO3prec - 2.0*MnSprod - 2.0*FeCO3prec +                           &
+     &    2.0*MnSdiss + 2*FeCO3dis + 2*FeCO3dis
 
 
   
@@ -636,10 +642,40 @@
           MnO2deepflux = Flux(N+1)
   
           CALL diff1D (N, MnO2B, MnO2Bdepo, 0.d0, 0.d0, 0.d0,	                   &
-     &   1, 3, w, Db, Zero, Aint, 1.d0-intpor, 1.d0 - por, dx, dxint,              &
+     &   1, 3, w, Db, Zero, Aint, 1.d0-intpor, 1.d0 - por, dx, dxint,               &
      &   Flux, dMnO2B, irrf)
           MnO2Bdeepflux = Flux(N+1)
-  
+
+          CALL diff1D (N, FeS, 0.D0, 0.d0, 0.d0, 0.d0,	                              &
+     &   1, 3, w, Db, Zero, Aint, 1.d0-intpor, 1.d0 - por, dx, dxint,                &
+     &   Flux, dFeS, irrf)
+          ! FeSdeepflux = Flux(N+1)
+
+          CALL diff1D (N, FeS2, 0.D0, 0.d0, 0.d0, 0.d0,	                         &
+     &   1, 3, w, Db, Zero, Aint, 1.d0-intpor, 1.d0 - por, dx, dxint,                &
+     &   Flux, dFeS2, irrf)
+          ! FeS2deepflux = Flux(N+1)
+
+          CALL diff1D (N, S0, 0.D0, 0.d0, 0.d0, 0.d0,	                              &
+     &   1, 3, w, Db, Zero, Aint, 1.d0-intpor, 1.d0 - por, dx, dxint,                &
+     &   Flux, dS0, irrf)
+          ! S0deepflux = Flux(N+1)
+
+          CALL diff1D (N, MnCO3, 0.D0, 0.d0, 0.d0, 0.d0,	                         &
+     &   1, 3, w, Db, Zero, Aint, 1.d0-intpor, 1.d0 - por, dx, dxint,                &
+     &   Flux, dMnCO3, irrf)
+          ! MnCO3deepflux = Flux(N+1)
+
+          CALL diff1D (N, FeCO3, 0.D0, 0.d0, 0.d0, 0.d0,	                         &
+     &   1, 3, w, Db, Zero, Aint, 1.d0-intpor, 1.d0 - por, dx, dxint,                &
+     &   Flux, dFeCO3, irrf)
+          ! FeCO3deepflux = Flux(N+1)
+
+          CALL diff1D (N, MnS, 0.D0, 0.d0, 0.d0, 0.d0,	                         &
+     &   1, 3, w, Db, Zero, Aint, 1.d0-intpor, 1.d0 - por, dx, dxint,                &
+     &   Flux, dMnS, irrf)
+          ! FeCO3deepflux = Flux(N+1)
+     
         END SUBROUTINE FESDIAtransolid
   
   
@@ -845,6 +881,9 @@
          TotAgeMnox    = 0.D0
          TotAgeFeox    = 0.D0
          TotMnCO3prec  = 0.D0
+         TotMnCO3dis   = 0.D0
+         TotFeCO3prec  = 0.D0
+         TotFeCO3dis   = 0.D0
          TotMn         = 0.D0 
          TotMnO2       = 0.D0
          TotFeOxidMnASC=0.D0 
@@ -912,6 +951,9 @@
            TotAgeMnox    = TotAgeMnox + AgeMnOx(I) * solfac
            TotAgeFeox    = TotAgeFeox + AgeFeOx(I) * solfac
            TotMnCO3prec  = TotMnCO3prec + MnCO3prec(I) * liqfac
+           TotMnCO3dis  = TotMnCO3dis + MnCO3dis(I) * solfac
+           TotFeCO3prec  = TotFeCO3prec + FeCO3prec(I) * liqfac
+           TotFeCO3dis  = TotFeCO3dis + FeCO3dis(I) * solfac
            TotMn         = TotMn + Mn(I) * liqfac
            TotMnO2       = TotMnO2 + sumMnO2(I) * solfac
            TotFeOxidMnASC= TotFeOxidMnASC + FeOxidMn(I) * liqfac

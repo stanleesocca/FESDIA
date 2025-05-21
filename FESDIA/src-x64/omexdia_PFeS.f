@@ -61,7 +61,7 @@
 !......................... declaration section.............................
       INTEGER           :: neq, ip(*), i
 
-      DOUBLE PRECISION  :: t,Conc(21*N),dConc(21*N),yout(*)
+      DOUBLE PRECISION  :: t,Conc(26*N),dConc(26*N),yout(*)
 
       CHARACTER(len=80) msg
 
@@ -95,6 +95,11 @@
 	      Mn(I)     = Conc(18*N+I)
 	      MnO2(I)   = Conc(19*N+I)
 	      MnO2B(I)  = Conc(20*N+I)
+        FeS(I)    = Conc(21*N+I)
+        FeS2(I)   = Conc(22*N+I)
+        S0(I)     = Conc(23*N+I)
+        MnCO3(I)  = Conc(24*N+I)
+        FeCO3(I)  = Conc(25*N+I)
        ENDDO
       
 ! --------------------------------------------------------------------------
@@ -118,7 +123,8 @@
 
        CALL FESDIAtransolid(FDETFLux,SDETFLux,0.D0,0.D0,                        &
      &                      FeOH3surfflux,CaPflux,FeOH3Bsurfflux,		            &
-     &			                MnO2surfflux, MnO2Bsurfflux)
+     &			                MnO2surfflux, MnO2Bsurfflux,                        &
+     &                      0.D0, 0.D0,0.D0,0.D0,0.D0)
 
        CALL FESDIAtranliquid(bwO2, bwNO3, bwNO2, bwNH3, bwCH4, bwPO4,           &
      &                      bwFe, bwH2S, bwSO4, bwDIC, bwALK, bwMn)
@@ -152,5 +158,10 @@
 	       dConc(18*N+I) =  dMn(I)
 	       dConc(19*N+I) =  dMnO2(I)
 	       dConc(20*N+I) =  dMnO2B(I)
+         dConc(21*N+I)    = dFeS(I)
+         dConc(22*N+I)   = dFeS2(I)
+         dConc(23*N+I)     = dS0(I)
+         dConc(24*N+I)  = dMnCO3(I)
+         dConc(25*N+I)  = dFeCO3(I)
        ENDDO 
       END SUBROUTINE fesdiamod

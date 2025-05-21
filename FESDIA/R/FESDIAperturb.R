@@ -62,6 +62,7 @@ DepositDET <- function (FDET, N.Pert, porGrid, Grid, fac, extmix = FALSE) {
     if(extmix){
     	FDETn[N.Pert+1] <- mean(FDETn[((N.Pert+1)-5):((N.Pert+1)+5)])
     }
+
    return(FDETn)
 }
 
@@ -101,7 +102,7 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
      irrigation = NULL, surface = NULL, 
      diffusionfactor = NULL,  dynamicbottomwater = FALSE, 
      perturbType = "deposit", perturbTimes, 
-     perturbDepth = 5, concfac = NULL, 
+     perturbDepth = rep(5, length(perturbTimes)), concfac = NULL, 
      CfluxForc  = NULL, FeOH3fluxForc = NULL, CaPfluxForc = NULL,  
      O2bwForc   = NULL,   NO3bwForc  = NULL,  
      NO2bwForc  = NULL,   NH3bwForc  = NULL,  FebwForc   = NULL,  
@@ -111,10 +112,10 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
      rFastForc  = NULL,   rSlowForc  = NULL,  pFastForc  = NULL,  
      MPBprodForc= NULL,  gasfluxForc = NULL,  HwaterForc = NULL, 
      ratefactor = NULL,  MnbwForc = NULL,     MnO2fluxForc = NULL,  
-     verbose = FALSE, extmix = FALSE,...) {
+     verbose = FALSE, extmix = FALSE, ...) {
   
   # if(length(concfac) == 1) concfac <- rep(concfac, 6)
- if(is.null(concfac)) concfac <- matrix(1, nrow = length(perturbTimes), ncol = 6)
+  if(is.null(concfac)) concfac <- matrix(1, nrow = length(perturbTimes), ncol = 6)
 
 ## check parameter inputs
   model <- 1
@@ -201,7 +202,7 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
   Parms <- STD$Parms
   PP <- unlist(Parms)
 
-  nspec        <- 21
+  nspec        <- 27
 
   ## event time counter index
   tindex <- 0
@@ -291,8 +292,9 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
                  NO2 = 0,   NH3 = 0,   DIC = 0,   Fe = 0,
                  FeOH3 = 0, H2S = 0,   SO4 = 0,   CH4 = 0,
                  PO4 = 0,   FeP = 0,   CaP = 0,   Pads= 0, 
-		 ALK = 0, FeOH3B = 0,  Mn  = 0,   MnO2 = 0, 
-    		 MnO2B = 0)
+		             ALK = 0, FeOH3B = 0,  Mn  = 0,   MnO2 = 0, 
+    		         MnO2B = 0, FeS = 0, FeS2 = 0, S0 = 0, MnCO3 = 0, 
+                 FeCO3 = 0, MnS = 0)
 
     if (model == 1){
       bw_O2  <- bwO2(t)
@@ -348,17 +350,29 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
     MnConc    <- IntegrateLiq(pertCONC[ ,"Mn" ], .FESDIA$N, porGrid, Grid)
     MnO2Conc  <- IntegrateSol(pertCONC[ ,"MnO2"],.FESDIA$N, porGrid, Grid)
     MnO2BConc <- IntegrateSol(pertCONC[ ,"MnO2B"],.FESDIA$N, porGrid, Grid)
+    FeSConc   <- IntegrateSol(pertCONC[ ,"FeS"],.FESDIA$N, porGrid, Grid)
+    FeS2Conc  <- IntegrateSol(pertCONC[ ,"FeS2"],.FESDIA$N, porGrid, Grid)
+    S0Conc    <- IntegrateSol(pertCONC[ ,"S0"], .FESDIA$N, porGrid, Grid)
+    MnCO3Conc <- IntegrateSol(pertCONC[ ,"MnCO3"],.FESDIA$N, porGrid, Grid)
+    FeCO3Conc <- IntegrateSol(pertCONC[ ,"FeCO3"],.FESDIA$N, porGrid, Grid)
+    MnSConc   <- IntegrateSol(pertCONC[ ,"MnS"],.FESDIA$N, porGrid, Grid)
 
     if (perttype[i] == "mix") {    # mixed
-      pertCONC[,"FDET"]  <- MixDET (pertCONC[,"FDET"], N.Pert[i], porGrid, Grid)
-      pertCONC[,"SDET"]  <- MixDET (pertCONC[,"SDET"], N.Pert[i], porGrid, Grid)
-      pertCONC[,"FeP"]   <- MixDET (pertCONC[,"FeP"] , N.Pert[i], porGrid, Grid)
-      pertCONC[,"CaP"]   <- MixDET (pertCONC[,"CaP"] , N.Pert[i], porGrid, Grid)
-      pertCONC[,"Pads"]  <- MixDET (pertCONC[,"Pads"], N.Pert[i], porGrid, Grid)
-      pertCONC[,"FeOH3"] <- MixDET (pertCONC[,"FeOH3"],N.Pert[i], porGrid, Grid)
+      pertCONC[,"FDET"]   <- MixDET (pertCONC[,"FDET"], N.Pert[i], porGrid, Grid)
+      pertCONC[,"SDET"]   <- MixDET (pertCONC[,"SDET"], N.Pert[i], porGrid, Grid)
+      pertCONC[,"FeP"]    <- MixDET (pertCONC[,"FeP"] , N.Pert[i], porGrid, Grid)
+      pertCONC[,"CaP"]    <- MixDET (pertCONC[,"CaP"] , N.Pert[i], porGrid, Grid)
+      pertCONC[,"Pads"]   <- MixDET (pertCONC[,"Pads"], N.Pert[i], porGrid, Grid)
+      pertCONC[,"FeOH3"]  <- MixDET (pertCONC[,"FeOH3"],N.Pert[i], porGrid, Grid)
       pertCONC[,"FeOH3B"] <- MixDET (pertCONC[,"FeOH3B"],N.Pert[i], porGrid, Grid)
       pertCONC[,"MnO2"]   <- MixDET (pertCONC[,"MnO2"],N.Pert[i], porGrid, Grid)
       pertCONC[,"MnO2B"]  <- MixDET (pertCONC[,"MnO2B"],N.Pert[i], porGrid, Grid)
+      pertCONC[,"FeS"]    <- MixDET (pertCONC[,"FeS"],N.Pert[i], porGrid, Grid)
+      pertCONC[,"FeS2"]   <- MixDET (pertCONC[,"FeS2"],N.Pert[i], porGrid, Grid)
+      pertCONC[,"S0"]     <- MixDET (pertCONC[,"S0"],N.Pert[i], porGrid, Grid)
+      pertCONC[,"MnCO3"]  <- MixDET (pertCONC[,"MnCO3"],N.Pert[i], porGrid, Grid)
+      pertCONC[,"FeCO3"]  <- MixDET (pertCONC[,"FeCO3"],N.Pert[i], porGrid, Grid)
+      pertCONC[,"MnS"]  <- MixDET (pertCONC[,"MnS"],N.Pert[i], porGrid, Grid)
       pertCONC[1:N.Pert[i], "O2"]  <- bw_O2
       pertCONC[1:N.Pert[i], "NO3"] <- bw_NO3
       pertCONC[1:N.Pert[i], "NO2"] <- bw_NO2
@@ -373,73 +387,91 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
       pertCONC[1:N.Pert[i], "Mn" ] <- bw_Mn
 
      } else if (perttype[i] == "erode") {  # erosion
-       pertCONC[,"FDET"] <- Erode (pertCONC[,"FDET"] , N.Pert[i], porGrid, Grid)
-       pertCONC[,"SDET"] <- Erode (pertCONC[,"SDET"] , N.Pert[i], porGrid, Grid)
-       pertCONC[,"FeP"]  <- Erode (pertCONC[,"FeP"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"CaP"]  <- Erode (pertCONC[,"CaP"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"Pads"] <- Erode (pertCONC[,"Pads"] , N.Pert[i], porGrid, Grid)
-       pertCONC[,"FeOH3"]<- Erode (pertCONC[,"FeOH3"], N.Pert[i], porGrid, Grid)
-       pertCONC[,"FeOH3B"]<- Erode (pertCONC[,"FeOH3B"], N.Pert[i], porGrid, Grid)
-       pertCONC[,"MnO2"] <- Erode (pertCONC[,"MnO2"], N.Pert[i], porGrid, Grid)
-       pertCONC[,"MnO2B"] <- Erode (pertCONC[,"MnO2B"], N.Pert[i], porGrid, Grid)
-       pertCONC[,"O2"]   <- Erode (pertCONC[,"O2"]   , N.Pert[i], porGrid, Grid)
-       pertCONC[,"NO3"]  <- Erode (pertCONC[,"NO3"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"NO2"]  <- Erode (pertCONC[,"NO2"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"NH3"]  <- Erode (pertCONC[,"NH3"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"DIC"]  <- Erode (pertCONC[,"DIC"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"ALK"]  <- Erode (pertCONC[,"ALK"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"PO4"]  <- Erode (pertCONC[,"PO4"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"CH4"]  <- Erode (pertCONC[,"CH4"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"H2S"]  <- Erode (pertCONC[,"H2S"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"SO4"]  <- Erode (pertCONC[,"SO4"]  , N.Pert[i], porGrid, Grid)
-       pertCONC[,"Fe"]   <- Erode (pertCONC[,"Fe"]   , N.Pert[i], porGrid, Grid)
-       pertCONC[,"Mn"]   <- Erode (pertCONC[,"Mn"]   , N.Pert[i], porGrid, Grid)
+       pertCONC[,"FDET"]   <- Erode (pertCONC[,"FDET"] , N.Pert[i], porGrid, Grid)
+       pertCONC[,"SDET"]   <- Erode (pertCONC[,"SDET"] , N.Pert[i], porGrid, Grid)
+       pertCONC[,"FeP"]    <- Erode (pertCONC[,"FeP"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"CaP"]    <- Erode (pertCONC[,"CaP"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"Pads"]   <- Erode (pertCONC[,"Pads"] , N.Pert[i], porGrid, Grid)
+       pertCONC[,"FeOH3"]  <- Erode (pertCONC[,"FeOH3"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"FeOH3B"] <- Erode (pertCONC[,"FeOH3B"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"MnO2"]   <- Erode (pertCONC[,"MnO2"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"MnO2B"]  <- Erode (pertCONC[,"MnO2B"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"FeS"]    <- Erode (pertCONC[,"FeS"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"FeS2"]   <- Erode (pertCONC[,"FeS2"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"S0"]     <- Erode (pertCONC[,"S0"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"MnCO3"]  <- Erode (pertCONC[,"MnCO3"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"FeCO3"]  <- Erode (pertCONC[,"FeCO3"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"MnS"]    <- Erode (pertCONC[,"MnS"], N.Pert[i], porGrid, Grid)
+       pertCONC[,"O2"]     <- Erode (pertCONC[,"O2"]   , N.Pert[i], porGrid, Grid)
+       pertCONC[,"NO3"]    <- Erode (pertCONC[,"NO3"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"NO2"]    <- Erode (pertCONC[,"NO2"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"NH3"]    <- Erode (pertCONC[,"NH3"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"DIC"]    <- Erode (pertCONC[,"DIC"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"ALK"]    <- Erode (pertCONC[,"ALK"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"PO4"]    <- Erode (pertCONC[,"PO4"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"CH4"]    <- Erode (pertCONC[,"CH4"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"H2S"]    <- Erode (pertCONC[,"H2S"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"SO4"]    <- Erode (pertCONC[,"SO4"]  , N.Pert[i], porGrid, Grid)
+       pertCONC[,"Fe"]     <- Erode (pertCONC[,"Fe"]   , N.Pert[i], porGrid, Grid)
+       pertCONC[,"Mn"]     <- Erode (pertCONC[,"Mn"]   , N.Pert[i], porGrid, Grid)
 
      } else { # deposit
-       pertCONC[,"FDET"] <- DepositDET (pertCONC[,"FDET"],  N.Pert[i], porGrid, Grid, c1, extmix)
-       pertCONC[,"SDET"] <- DepositDET (pertCONC[,"SDET"],  N.Pert[i], porGrid, Grid, c2, extmix)
-       pertCONC[,"FeP"]  <- DepositDET (pertCONC[,"FeP"] ,  N.Pert[i], porGrid, Grid, 1, extmix)
-       pertCONC[,"CaP"]  <- DepositDET (pertCONC[,"CaP"] ,  N.Pert[i], porGrid, Grid, 1, extmix)
-       pertCONC[,"FeOH3"]<- DepositDET (pertCONC[,"FeOH3"], N.Pert[i], porGrid, Grid, c3, extmix)
-       pertCONC[,"FeOH3B"]<-DepositDET (pertCONC[,"FeOH3B"], N.Pert[i], porGrid,Grid, c4, extmix)
-       pertCONC[,"MnO2"]  <-DepositDET (pertCONC[,"MnO2"], N.Pert[i], porGrid,  Grid, c5, extmix)
-       pertCONC[,"MnO2B"]<-DepositDET (pertCONC[,"MnO2B"], N.Pert[i], porGrid,  Grid, c6, extmix)
-       pertCONC[,"Pads"] <- DepositDET (pertCONC[,"Pads"],  N.Pert[i], porGrid, Grid, 1, extmix)
-       pertCONC[,"O2"]   <- DepositBW (pertCONC[,"O2"]  ,   N.Pert[i], bwO2(t) , Grid)
-       pertCONC[,"NO3"]  <- DepositBW (pertCONC[,"NO3"] ,   N.Pert[i], bwNO3(t), Grid)
-       pertCONC[,"NO2"]  <- DepositBW (pertCONC[,"NO2"] ,   N.Pert[i], bwNO2(t), Grid)
-       pertCONC[,"NH3"]  <- DepositBW (pertCONC[,"NH3"] ,   N.Pert[i], bwNH3(t), Grid)
-       pertCONC[,"DIC"]  <- DepositBW (pertCONC[,"DIC"] ,   N.Pert[i], bwDIC(t), Grid)
-       pertCONC[,"ALK"]  <- DepositBW (pertCONC[,"ALK"] ,   N.Pert[i], bwALK(t), Grid)
-       pertCONC[,"PO4"]  <- DepositBW (pertCONC[,"PO4"] ,   N.Pert[i], bwPO4(t), Grid)
-       pertCONC[,"CH4"]  <- DepositBW (pertCONC[,"CH4"] ,   N.Pert[i], bwCH4(t), Grid)
-       pertCONC[,"H2S"]  <- DepositBW (pertCONC[,"H2S"] ,   N.Pert[i], bwH2S(t), Grid)
-       pertCONC[,"SO4"]  <- DepositBW (pertCONC[,"SO4"] ,   N.Pert[i], bwSO4(t), Grid)
-       pertCONC[,"Fe" ]  <- DepositBW (pertCONC[,"Fe" ] ,   N.Pert[i], bwFe(t) , Grid)
-       pertCONC[,"Mn" ]  <- DepositBW (pertCONC[,"Mn" ] ,   N.Pert[i], bwMn(t) , Grid)
+       pertCONC[,"FDET"]    <- DepositDET (pertCONC[,"FDET"],  N.Pert[i], porGrid, Grid, c1, extmix)
+       pertCONC[,"SDET"]    <- DepositDET (pertCONC[,"SDET"],  N.Pert[i], porGrid, Grid, c2, extmix)
+       pertCONC[,"FeP"]     <- DepositDET (pertCONC[,"FeP"] ,  N.Pert[i], porGrid, Grid, 1 , extmix)
+       pertCONC[,"CaP"]     <- DepositDET (pertCONC[,"CaP"] ,  N.Pert[i], porGrid, Grid, 1 , extmix)
+       pertCONC[,"FeOH3"]   <- DepositDET (pertCONC[,"FeOH3"], N.Pert[i], porGrid, Grid, c3, extmix)
+       pertCONC[,"FeOH3B"]  <-DepositDET (pertCONC[,"FeOH3B"], N.Pert[i], porGrid, Grid, c4, extmix)
+       pertCONC[,"MnO2"]    <-DepositDET (pertCONC[,"MnO2"],   N.Pert[i], porGrid, Grid, c5, extmix)
+       pertCONC[,"MnO2B"]   <-DepositDET (pertCONC[,"MnO2B"],  N.Pert[i], porGrid, Grid, c6, extmix)
+       pertCONC[,"Pads"]    <- DepositDET (pertCONC[,"Pads"],  N.Pert[i], porGrid, Grid, 1 , extmix)
+       pertCONC[,"FeS"]     <-DepositDET (pertCONC[,"FeS"],    N.Pert[i], porGrid, Grid, 1 , extmix)
+       pertCONC[,"FeS2"]    <-DepositDET (pertCONC[,"FeS2"],   N.Pert[i], porGrid, Grid, 1 , extmix)
+       pertCONC[,"S0"]      <-DepositDET (pertCONC[,"S0"],     N.Pert[i], porGrid, Grid, 1 , extmix)
+       pertCONC[,"MnCO3"]   <-DepositDET (pertCONC[,"MnCO3"],  N.Pert[i], porGrid, Grid, 1 , extmix)
+       pertCONC[,"FeCO3"]   <-DepositDET (pertCONC[,"FeCO3"],  N.Pert[i], porGrid, Grid, 1 , extmix)
+       pertCONC[,"MnS"]     <-DepositDET (pertCONC[,"MnS"],    N.Pert[i], porGrid, Grid, 1 , extmix)
+       pertCONC[,"O2"]      <- DepositBW (pertCONC[,"O2"]  ,   N.Pert[i], bwO2(t) , Grid)
+       pertCONC[,"NO3"]     <- DepositBW (pertCONC[,"NO3"] ,   N.Pert[i], bwNO3(t), Grid)
+       pertCONC[,"NO2"]     <- DepositBW (pertCONC[,"NO2"] ,   N.Pert[i], bwNO2(t), Grid)
+       pertCONC[,"NH3"]     <- DepositBW (pertCONC[,"NH3"] ,   N.Pert[i], bwNH3(t), Grid)
+       pertCONC[,"DIC"]     <- DepositBW (pertCONC[,"DIC"] ,   N.Pert[i], bwDIC(t), Grid)
+       pertCONC[,"ALK"]     <- DepositBW (pertCONC[,"ALK"] ,   N.Pert[i], bwALK(t), Grid)
+       pertCONC[,"PO4"]     <- DepositBW (pertCONC[,"PO4"] ,   N.Pert[i], bwPO4(t), Grid)
+       pertCONC[,"CH4"]     <- DepositBW (pertCONC[,"CH4"] ,   N.Pert[i], bwCH4(t), Grid)
+       pertCONC[,"H2S"]     <- DepositBW (pertCONC[,"H2S"] ,   N.Pert[i], bwH2S(t), Grid)
+       pertCONC[,"SO4"]     <- DepositBW (pertCONC[,"SO4"] ,   N.Pert[i], bwSO4(t), Grid)
+       pertCONC[,"Fe" ]     <- DepositBW (pertCONC[,"Fe" ] ,   N.Pert[i], bwFe(t) , Grid)
+       pertCONC[,"Mn" ]     <- DepositBW (pertCONC[,"Mn" ] ,   N.Pert[i], bwMn(t) , Grid)
      }
     Fluxes <- Fluxes + 
-       c(FDET = -(FDETConc - IntegrateSol(pertCONC[ ,"FDET"],.FESDIA$N, porGrid, Grid)),
-         SDET = -(SDETConc - IntegrateSol(pertCONC[ ,"SDET"],.FESDIA$N, porGrid, Grid)),
-         O2   = -(O2Conc   - IntegrateLiq(pertCONC[ ,"O2"] ,.FESDIA$N, porGrid, Grid)),
-         NO3  = -(NO3Conc  - IntegrateLiq(pertCONC[ ,"NO3"],.FESDIA$N, porGrid, Grid)),
-         NO2  = -(NO2Conc  - IntegrateLiq(pertCONC[ ,"NO2"],.FESDIA$N, porGrid, Grid)),
-         NH3  = -(NH3Conc  - IntegrateLiq(pertCONC[ ,"NH3"],.FESDIA$N, porGrid, Grid)),
-         PO4  = -(PO4Conc  - IntegrateLiq(pertCONC[ ,"PO4"],.FESDIA$N, porGrid, Grid)),
-         FeP  = -(FePConc  - IntegrateSol(pertCONC[ ,"FeP"],.FESDIA$N, porGrid, Grid)),
-         CaP  = -(CaPConc  - IntegrateSol(pertCONC[ ,"CaP"],.FESDIA$N, porGrid, Grid)),
-         Pads = -(PadsConc - IntegrateSol(pertCONC[ ,"Pads"],.FESDIA$N, porGrid, Grid)),
-         DIC  = -(DICConc  - IntegrateLiq(pertCONC[ ,"DIC"],.FESDIA$N, porGrid, Grid)),
-         Fe   = -(FeConc   - IntegrateLiq(pertCONC[ ,"Fe"] ,.FESDIA$N, porGrid, Grid)),
-         FeOH3=-(FeOH3Conc - IntegrateSol(pertCONC[,"FeOH3"],.FESDIA$N, porGrid, Grid)),
-         H2S  = -(H2SConc  - IntegrateLiq(pertCONC[ ,"H2S"],.FESDIA$N, porGrid, Grid)),
-         SO4  = -(SO4Conc  - IntegrateLiq(pertCONC[ ,"SO4"],.FESDIA$N, porGrid, Grid)),
-         CH4  = -(CH4Conc  - IntegrateLiq(pertCONC[ ,"CH4"],.FESDIA$N, porGrid, Grid)),
-         ALK  = -(ALKConc  - IntegrateLiq(pertCONC[ ,"ALK"],.FESDIA$N, porGrid, Grid)),
-         FeOH3B=-(FeOH3BConc-IntegrateSol(pertCONC[ ,"FeOH3B"],.FESDIA$N, porGrid, Grid)),
-         Mn   = -(MnConc-IntegrateLiq(pertCONC[ ,"Mn"],.FESDIA$N, porGrid, Grid)), 
-         MnO2 = -(MnO2Conc-IntegrateSol(pertCONC[ ,"MnO2"],.FESDIA$N, porGrid, Grid)), 
-         MnO2B=-(MnO2BConc-IntegrateSol(pertCONC[ ,"MnO2B"],.FESDIA$N, porGrid, Grid)))
+       c(FDET    =  -(FDETConc   -  IntegrateSol(pertCONC[ ,"FDET"],.FESDIA$N, porGrid, Grid)),
+         SDET    =  -(SDETConc   -  IntegrateSol(pertCONC[ ,"SDET"],.FESDIA$N, porGrid, Grid)),
+         O2      =  -(O2Conc     -  IntegrateLiq(pertCONC[ ,"O2"] ,.FESDIA$N, porGrid, Grid)),
+         NO3     =  -(NO3Conc    -  IntegrateLiq(pertCONC[ ,"NO3"],.FESDIA$N, porGrid, Grid)),
+         NO2     =  -(NO2Conc    -  IntegrateLiq(pertCONC[ ,"NO2"],.FESDIA$N, porGrid, Grid)),
+         NH3     =  -(NH3Conc    -  IntegrateLiq(pertCONC[ ,"NH3"],.FESDIA$N, porGrid, Grid)),
+         PO4     =  -(PO4Conc    -  IntegrateLiq(pertCONC[ ,"PO4"],.FESDIA$N, porGrid, Grid)),
+         FeP     =  -(FePConc    -  IntegrateSol(pertCONC[ ,"FeP"],.FESDIA$N, porGrid, Grid)),
+         CaP     =  -(CaPConc    -  IntegrateSol(pertCONC[ ,"CaP"],.FESDIA$N, porGrid, Grid)),
+         Pads    =  -(PadsConc   -  IntegrateSol(pertCONC[ ,"Pads"],.FESDIA$N, porGrid, Grid)),
+         DIC     =  -(DICConc    -  IntegrateLiq(pertCONC[ ,"DIC"],.FESDIA$N, porGrid, Grid)),
+         Fe      =  -(FeConc     -  IntegrateLiq(pertCONC[ ,"Fe"] ,.FESDIA$N, porGrid, Grid)),
+         FeOH3   =  -(FeOH3Conc  -  IntegrateSol(pertCONC[,"FeOH3"],.FESDIA$N, porGrid, Grid)),
+         H2S     =  -(H2SConc    -  IntegrateLiq(pertCONC[ ,"H2S"],.FESDIA$N, porGrid, Grid)),
+         SO4     =  -(SO4Conc    -  IntegrateLiq(pertCONC[ ,"SO4"],.FESDIA$N, porGrid, Grid)),
+         CH4     =  -(CH4Conc    -  IntegrateLiq(pertCONC[ ,"CH4"],.FESDIA$N, porGrid, Grid)),
+         ALK     =  -(ALKConc    -  IntegrateLiq(pertCONC[ ,"ALK"],.FESDIA$N, porGrid, Grid)),
+         FeOH3B  =  -(FeOH3BConc -  IntegrateSol(pertCONC[ ,"FeOH3B"],.FESDIA$N, porGrid, Grid)),
+         Mn      =  -(MnConc     -  IntegrateLiq(pertCONC[ ,"Mn"],.FESDIA$N, porGrid, Grid)), 
+         MnO2    =  -(MnO2Conc   -  IntegrateSol(pertCONC[ ,"MnO2"],.FESDIA$N, porGrid, Grid)), 
+         MnO2B   =  -(MnO2BConc  -  IntegrateSol(pertCONC[ ,"MnO2B"],.FESDIA$N, porGrid, Grid)), 
+         FeS     =  -(FeSConc    -  IntegrateSol(pertCONC[ ,"FeS"],.FESDIA$N, porGrid, Grid)), 
+         FeS2    =  -(FeS2Conc   -  IntegrateSol(pertCONC[ ,"FeS2"],.FESDIA$N, porGrid, Grid)), 
+         S0      =  -(S0Conc     -  IntegrateSol(pertCONC[ ,"S0"],.FESDIA$N, porGrid, Grid)), 
+         MnCO3   =  -(MnCO3Conc  -  IntegrateSol(pertCONC[ ,"MnCO3"],.FESDIA$N, porGrid, Grid)), 
+         FeCO3   =  -(FeCO3Conc  -  IntegrateSol(pertCONC[ ,"FeCO3"],.FESDIA$N, porGrid, Grid)), 
+         MnS     =  -(MnSConc    -  IntegrateSol(pertCONC[ ,"MnS"],.FESDIA$N, porGrid, Grid)))
     }
       PertFlux <<- rbind(PertFlux, Fluxes)
       
@@ -472,10 +504,10 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
 
   if (STD$isDistReact | model == 2) {
      band   <- 0
-     lrw <- 500000
+     lrw <- 600000
   } else  {
       band   <- 1
-     lrw <- 250000
+     lrw <- 400000
   }
 
   if (model == 1) {
@@ -654,7 +686,6 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
   attr(DYN, "DistReact")   <- STD$DistReact
   
   attr(DYN, "Parms") <- STD$Parms
-#  cat(PertFlux, "\n")
   attr(DYN, "perturbFluxes")  <- data.frame(time = perturbTimes[1:nrow(PertFlux)], PertFlux)
   if (model == 2) {
     attr(DYN, "BWbeforePert") <- data.frame(time = PertBW[1:nrow(PertBW)], PertBW)

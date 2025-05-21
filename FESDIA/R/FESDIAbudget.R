@@ -10,7 +10,8 @@ dVal <- function(out)  {# derivative
             "TotalSO4", "TotalH2S","TotalCH4", "TotalPO4", "TotalFeP",
             "TotalCaP", "TotalPads", "TotalMn", "TotalMnO2", 
              "TotFeSprod","TotMnSprod", "TotH2SoxidFe", 
-            "TotH2SoxidMn", "TotFeOxidMnASC", "TotMnCO3prec")
+            "TotH2SoxidMn", "TotFeOxidMnASC", "TotMnCO3prec", "TotFeCO3prec", 
+            "TotFeCO3dis", "TotFeCO3dis")
   if (inherits(out, c("PHDIAstd", "PHDIAdyn")))
     toty <- c(toty, "TotalCaCO3", "TotalARAG")
 
@@ -223,7 +224,10 @@ FESDIAbudgetC_one <- function(out) {
     Methanogenesis     = out$TotMeth,
     TotalMineralisation   = out$TotMin,  
     CH4oxidation       = out$TotCH4oxid,
-    MnCO3precitation  = out$TotMnCO3prec, ## This is supposed to be minus as it is a sink of DIC; Also think of whether to include the TotFeCO3 in the final version 
+    MnCO3precitation  = -out$TotMnCO3prec, ## This is supposed to be minus as it is a sink of DIC; Also think of whether to include the TotFeCO3 in the final version 
+    MnCO3dissolution  = out$TotMnCO3dis,
+    FeCO3precitation  = -out$TotFeCO3prec, ## This is supposed to be minus as it is a sink of DIC; Also think of whether to include the TotFeCO3 in the final version 
+    FeCO3dissolution  = out$TotFeCO3dis,
     CH4oxid.dist       = out$TotCH4oxsurf,
     CH4oxidAOM         = out$TotAOM,
     MPBDICuptake       = -out$TotO2prod,
@@ -243,8 +247,8 @@ FESDIAbudgetC_one <- function(out) {
     rownames(Rates) <- "nmolC/cm2/d"  
 
       # derivatives
-  mat <- matrix (nrow = 10, ncol = 10, data = 0)
-  rownames(mat) <- colnames(mat) <- c("Ext", "DET", "DIC", "CaP", "CH4", "MPB", "MnCO3", "CaCO3", "ARAG", "Burial")
+  mat <- matrix (nrow = 11, ncol = 11, data = 0)
+  rownames(mat) <- colnames(mat) <- c("Ext", "DET", "DIC", "CaP", "CH4", "MPB", "MnCO3", "FeCO3", "CaCO3", "ARAG", "Burial")
   mat["Ext", "DET"]    <- out$FDETflux      + out$SDETflux
   mat["DET", "Burial"] <- out$FDETdeepflux  + out$SDETdeepflux
   mat["Ext", "DIC"]    <-  out$DICflux * (out$DICflux > 0) 
@@ -263,6 +267,10 @@ FESDIAbudgetC_one <- function(out) {
   mat["DET", "CH4"] <- 0.5*Rates$Methanogenesis
   mat["CH4", "DIC"] <- Rates$CH4oxidation + Rates$CH4oxid.dist + Rates$CH4oxidAOM
   mat["DIC", "MnCO3"] <- Rates$MnCO3precitation
+  mat["DIC", "FeCO3"] <- Rates$FeCO3precitation
+  mat["MnCO3", "DIC"] <- Rates$MnCO3dissolution
+  mat["FeCO3", "DIC"] <- Rates$FeCO3dissolution
+  
 
   if (hasPH){
     mat["Ext", "CaCO3"]    <-  out$CaCO3flux * (out$CaCO3flux > 0) 
