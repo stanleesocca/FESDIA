@@ -6,6 +6,7 @@
 
 .FESDIA$N     <- 100
 .FESDIA$Grid  <- setup.grid.1D(x.up=0, dx.1 = 0.01, N = .FESDIA$N, L = 100)
+#.FESDIA$Grid  <- setup.grid.1D(x.up=0, dx.1 = 0.1, N = .FESDIA$N, L = 100)
 
 ##------------------------------------
 ## Parameters
@@ -16,7 +17,6 @@
     Cflux       = 20*1e5/12/365 ,  # nmolC/cm2/d  - Carbon deposition: 20gC/m2/yr
     pFast       = 0.9         , # -            fraction fast detritus in flux
     FeOH3flux   = 1           , # nmol/cm2/d   FeOH3 deposition rate
-    MnO2flux  = 1.0           ,  # Flux of Mn-oxide to SWI 
     CaPflux     = 0           , # nmolP/cm2/d deposition rate of CaP
     rFast       = 25/365      , # /d          decay rate fast decay detritus
     rSlow       = 0.05/365    , # /d          decay rate slow decay detritus
@@ -125,138 +125,120 @@
     kPO4upt   = 0.001         , # mmol/m3,    P limitation constant
     kDICupt   =     1         ,  # mmol/m3,    C limitation constant
     # new addition for v2.0
-    rH2Sfeoxa  = 1.2e-4        , # cm3/nmol/d  Rate of Sulphide-mediated iron reduction (oxyhydr)oxides
-    rH2Sfeoxb  = 1.2e-4        , # cm3/nmol/d  Rate of Sulphide-mediated iron reduction (oxyhydr)oxides      
+    rH2Sfeox  = 1.2e-4        , # cm3/nmol/d  Rate of Sulphide-mediated iron reduction (oxyhydr)oxides     
+    MnO2flux  = 1.0           ,  # Flux of Mn-oxide to SWI
     rAgeFeox  = 1.8e-8*60*60*24, # cm3/nmol/d Ageing of FeOx=A
     rMnOxid   = 60*60*24*1e-8  , # cm3/nmol/d Rate of Reoxidation of Mn by Oxygen
-    rH2SMnoxa  = 60*60*24*2e-9  , # cm3/nmol/d Rate of Reoxidation of H2S by MnOx
-    rH2SMnoxb  = 60*60*24*2e-9  , # cm3/nmol/d Rate of Reoxidation of H2S by MnOx
+    rH2SMnox  = 60*60*24*2e-9  , # cm3/nmol/d Rate of Reoxidation of H2S by MnOx
     rAgeMnox  = 5.4e-8*60*60*24, # cm3/nmol/d Ageing of MnOx=A
     rMnFe     = 7.5e-11*60*60*24,# cm3/nmol/d Rate of Reoxidation of Fe with MnOx
     rMnS      = 1e-5           , # cm3/nmol/d Rate of MnS formation
     rMnCO3prec= 3e-4           , # cm3/nmol/d Rate of MnCO3 formation 
+    rFeCO3prec=3e-4            , # cm3/nmol/d Rate of FeCO3 formation 
     ksMnO2    = 2600           , 
     pFastFeOx = 0.5            , # -            fraction fast FeOH in flux
     pFastMnOx = 0.5            , # -            fraction fast MnO2 in flux
-    rMnCO3dis = 3e-5           , # rate of MnCO3 dissolution
-    ksPrec    = 100            ,  # precipitation equilibrium constant
-    rMnSdiss = 1e-4            , 
-    rFeCO3prec = 1e-5          , 
-    rFeCO3dis  = 3e-5          , 
-    kinMnO2    = 2600
+    kinMnO2  = 2600            ,      
+    isDICcorr = FALSE	       
     )
 
+
 # parameter units
-.FESDIA$Parunit <- c("nmolC/cm2/d", "-", "nmolFe/cm2/d",  "nmolMn/cm2/d", "nmolCaP/cm2/d", "/d", "/d",      
-                     "molN/molC", "molN/molC", "molP/molC", "molP/molC", 
-                     "-", "-", rep("mmol/m3", times=12), rep("mmol/m3",times=12), 
-                     "cm/d","cm2/d", "cm", "/cm", "/d", "cm", "cm", "cm/d", 
-                     "-", "/d","/d", "/(mmol/m3)/d", "mmolO2/m3", "mmolO2/m3",
-                     "mmolNO3/m3", "mmolO2/m3", "mmolNO3/m3", "mmolO2/m3",
-                     "dgC", "psu", "%", "/d", "/d", "/d", "molP/molP", "/d", "/d", "mmolP/m3solid", 
-                     "mmolFeOH3/m3","mmolFeOH3/m3","mmolS/m3", "mmolS/m3", 
-                     "/(mmol/m3)/d", "/(mmol/m3)/d", "/(mmol/m3)/d","/(mmol/m3)/d", "/(mmol/m3)/d", 
-                     "/d", "/d", "mmol/m3", "mmolO2/m3", "cm", "/cm", 
-                     "-", "-", "cm", "-", 
-                     "/d", "cm", "cm/d", "cm/d", "cm/d", "cm/d", "-", 
-                     "mmol/m3/d", "/cm", "mmol/m3", "mmol/m3", "mmol/m3", 
-                     rep("cm3/nmol/d", 10), "mmolMn/m3", "-", "-", 
-                     "cm3/nmol/d", "mmol/m3", "cm3/nmol/d", "cm3/nmol/d", "cm3/nmol/d", "mmol/m3"  
+.FESDIA$Parunit <- c("nmolC/cm2/d", "-", "nmol/cm2/d", "nmol/cm2/d",  "/d", "/d",
+    "molN/molC", "molN/molC", "molP/molC", "molP/molC", "-", "-",
+    rep("mmol/m3", times=12), rep("mmol/m3",times=12), "cm/d",
+    "cm2/d", "cm", "/cm", "/d", "cm", "cm", "cm/d",
+    "-", "/d","/d", "/(mmol/m3)/d", "mmolO2/m3", "mmolO2/m3",
+    "mmolNO3/m3", "mmolO2/m3", "mmolNO3/m3", "mmolO2/m3",
+    "dgC", "psu", "%",
+    "/d", "/d", "/d", "mol/mol", "/d", "/d", "mmolP/m3solid", "mmolFeOH3/m3","mmolFeOH3/m3",
+    "mmolS/m3", "mmolS/m3", "/(mmol/m3)/d", "/(mmol/m3)/d", "/(mmol/m3)/d",
+    "/(mmol/m3)/d", "/(mmol/m3)/d", "/d", "/d", "mmol/m3", "mmolO2/m3", "cm", "/cm", "-", "-", "cm",
+    "-", "/d", "cm", "cm/d", "cm/d", "cm/d", "cm/d", "-", "mmol/m3/d", "/cm", "mmol/m3",
+     "mmol/m3", "mmol/m3", "cm3/nmol/d", "nmol/cm2/d", rep("cm3/nmol/d", 8), "mmol/m3",
+     "-", "-", "mmol/m3", "-"
+     )
+
+
+.FESDIA$Pardesc <- c("total organic C deposition","part FDET in carbon flux", 
+  "deposition rate of FeOH3", "deposition rate of CaP",
+  "decay rate FDET", "decay rate SDET", "NC ratio FDET", "NC ratio SDET",
+  "PC ratio FDET", "PC ratio SDET",
+  "upper boundary liq. 1:flux, 2:conc, 3:0-grad",
+  "lower boundary liq. 1:flux, 2:conc, 3:0-grad",
+  "upper boundary O2  -if BC=1: flux, 2:conc",
+  "upper boundary NO3 -if BC=1: flux, 2:conc",
+  "upper boundary NO2 -if BC=1: flux, 2:conc",
+  "upper boundary NH3 -if BC=1: flux, 2:conc",
+  "upper boundary CH4 -if BC=1: flux, 2:conc",
+  "upper boundary PO4 -if BC=1: flux, 2:conc",
+  "upper boundary DIC -if BC=1: flux, 2:conc",
+  "upper boundary Fe2+ -if BC=1: flux, 2:conc",
+  "upper boundary H2S -if BC=1: flux, 2:conc",
+  "upper boundary SO4 -if BC=1: flux, 2:conc",
+  "upper boundary alkalinity -if BC=1: flux, 2:conc",
+  "upper boundary Manganese -if BC=1: flux, 2:conc",
+  "lower boundary O2  -if BC=1: flux, 2:conc",
+  "lower boundary NO3 -if BC=1: flux, 2:conc",
+  "lower boundary NO2 -if BC=1: flux, 2:conc",
+  "lower boundary NH3 -if BC=1: flux, 2:conc",
+  "lower boundary CH3 -if BC=1: flux, 2:conc",
+  "lower boundary PO4 -if BC=1: flux, 2:conc",
+  "lower boundary DIC -if BC=1: flux, 2:conc",
+  "lower boundary Fe2+ -if BC=1: flux, 2:conc",
+  "lower boundary H2S -if BC=1: flux, 2:conc",
+  "lower boundary SO4 -if BC=1: flux, 2:conc",
+  "lower boundary alkalinity -if BC=1: flux, 2:conc",
+  "lower boundary Mangenese -if BC=1: flux, 2:conc",
+  
+  "advection rate", "bioturbation coefficient", "depth of mixed layer", 
+  "attenuation coeff below biotdepth", "bio-irrigation rate", 
+  "depth of irrigated layer", "attenuation coeff below irrdepth", 
+  "piston velocity for dry flats", "Adsorption coeff ammonium",
+  "Max nitrification rate step1 (NH3ox)", "Max nitrification rate step2 (NO2ox)",
+  "Anammox rate", "half-sat O2 in nitrification", "half-sat O2 in oxic mineralisation",
+  "half-sat NO3 in denitrification", "half-sat O2 inhib denitrification",
+  "half-sat NO3 inhib anoxic degr", "half-sat O2 inhib anoxic min",
+  "temperature", "salinity", "refractory Carbon conc",
+  "rate FeP adsorption",
+  "rate CaP production", "rate CaP dissolution","C:Pratio in CaP",
+  "adsorption rate PO4", "desorption rate of adsorbed P", "Max adsorbed P concentration", 
+  
+  "half-sat FeOH3 conc in iron reduction", "half-sat FeOH3 inhibition S reduction",
+  "half-sat SO4 conc in sulphate reduction", "half-sat SO4 inhibition methanogenesis",
+  "Max rate Fe oxidation", "Max rate H2S oxidation", "maximum rate FeS production",
+  "Max rate CH4 oxidation with O2", "Max rate anaerobic oxidation Methane", 
+  "Max rate H2S oxidation with BW O2", 
+  "Max rate CH4 oxidation with BW O2", 
+  "half-sat Alkalinity in oxidation of H2S/CH4 with bwO2", 
+  "half-sat Oxygen in oxidation of H2S/CH4 with bwO2", 
+  "Max depth H2S/CH4 oxidation with BW O2", "depth attenuation ODU oxidation",
+  
+  "surface porosity", "deep porosity", "porosity decay coefficient",
+  "formationfactor, 1=sand,2=fine sand,3=general",
+  "relaxation towards background conc ", "height of water over core",
+  "fall speed of organic C (FDET, SDET)", "fall speed of FeP", "fall speed of FeOH3", 
+  "fall speed of CaP", "solve for alkalinity", 
+  "maximal MPB production rate", "sedimentary light extinction coefficient",
+  "DIN limitation constant MPB", 
+  "P limitation constant MPB", 
+  "C limitation constant MPB", 
+  "Rate of Sulphide-mediated iron reduction (oxyhydr)oxides", 
+  "Flux of Mn Oxides",
+  "Ageing of FeOx=A",
+  "Rate of Reoxidation of Mn by Oxygen",
+  "Rate of Reoxidation of H2S by MnOx",
+  "Ageing of MnOx=A",
+  "Rate of Reoxidation of Fe with MnOx",
+  "Rate of MnS formation",
+  "Rate of MnCO3 formation",
+  "Rate of FeCO3 formation",
+  "Half saturation constant for Mn red", 
+  "fraction fast FeOH3 in flux", 
+  "fraction fast MnO2 in flux",
+ "Inhibition of iron and other by MnO2", 
+  "DIC correction for Calcite precip - Rassmann et al 2020"
 )
-
-
-.FESDIA$Pardesc <- c("Total organic C deposition","part FDET in carbon flux", 
-                     "Deposition rate of FeOOH", "Flux of MnO2", "Deposition rate of CaP",
-                     "Decay rate FDET", "Decay rate SDET", "NC ratio FDET", "NC ratio SDET",
-                     "PC ratio FDET", "PC ratio SDET",
-                     "Upper boundary liq. 1:flux, 2:conc, 3:0-grad",
-                     "Uower boundary liq. 1:flux, 2:conc, 3:0-grad",
-                     "Upper boundary O2  -if BC=1: flux, 2:conc",
-                     "Upper boundary NO3 -if BC=1: flux, 2:conc",
-                     "Upper boundary NO2 -if BC=1: flux, 2:conc",
-                     "Upper boundary NH3 -if BC=1: flux, 2:conc",
-                     "Upper boundary CH4 -if BC=1: flux, 2:conc",
-                     "Upper boundary PO4 -if BC=1: flux, 2:conc",
-                     "Upper boundary DIC -if BC=1: flux, 2:conc",
-                     "Upper boundary Fe2+ -if BC=1: flux, 2:conc",
-                     "Upper boundary H2S -if BC=1: flux, 2:conc",
-                     "Upper boundary SO4 -if BC=1: flux, 2:conc",
-                     "Upper boundary alkalinity -if BC=1: flux, 2:conc",
-                     "Upper boundary Manganese -if BC=1: flux, 2:conc",
-                     "Lower boundary O2  -if BC=1: flux, 2:conc",
-                     "Lower boundary NO3 -if BC=1: flux, 2:conc",
-                     "Lower boundary NO2 -if BC=1: flux, 2:conc",
-                     "Lower boundary NH3 -if BC=1: flux, 2:conc",
-                     "Lower boundary CH3 -if BC=1: flux, 2:conc",
-                     "Lower boundary PO4 -if BC=1: flux, 2:conc",
-                     "Lower boundary DIC -if BC=1: flux, 2:conc",
-                     "Lower boundary Fe2+ -if BC=1: flux, 2:conc",
-                     "Lower boundary H2S -if BC=1: flux, 2:conc",
-                     "Lower boundary SO4 -if BC=1: flux, 2:conc",
-                     "Lower boundary alkalinity -if BC=1: flux, 2:conc",
-                     "Lower boundary Mangenese -if BC=1: flux, 2:conc",
-                     
-                     "Advection rate", "Bioturbation coefficient", "Depth of mixed layer", 
-                     "Attenuation coeff below biotdepth", "Bio-irrigation rate", 
-                     "Depth of irrigated layer", "Attenuation coeff below irrdepth", 
-                     "Piston velocity for dry flats", 
-                     
-                     "Adsorption coeff ammonium",
-                     "Max nitrification rate step1 (NH3ox)", "Max nitrification rate step2 (NO2ox)",
-                     "Anammox rate", "half-sat O2 in nitrification", "Half-sat O2 in oxic mineralisation",
-                     "Half-sat NO3 in denitrification", "Half-sat O2 inhib denitrification",
-                     "Half-sat NO3 inhib anoxic degr", "Half-sat O2 inhib anoxic min",
-                     
-                     
-                     "Temperature", "Salinity", "Refractory Carbon conc",
-                     "Rate FeP adsorption", "rate CaP production", "rate CaP dissolution",
-                     "C:Pratio in CaP", "Adsorption rate PO4", "desorption rate of adsorbed P", 
-                     "Max adsorbed P concentration", 
-                     
-                     "Half-sat FeOH3 conc in iron reduction", "Half-sat FeOH3 inhibition S reduction",
-                     "Half-sat SO4 conc in sulphate reduction", "Half-sat SO4 inhibition methanogenesis",
-                     
-                     "Max rate Fe oxidation", "Max rate H2S oxidation", 
-                     "Maximum rate FeS production","Max rate CH4 oxidation with O2", 
-                     "Max rate anaerobic oxidation Methane", 
-                     "Max rate H2S oxidation with BW O2", 
-                     "Max rate CH4 oxidation with BW O2", 
-                     "half-sat Alkalinity in oxidation of H2S/CH4 with bwO2", 
-                     "half-sat Oxygen in oxidation of H2S/CH4 with bwO2", 
-                     "Max depth H2S/CH4 oxidation with BW O2", "depth attenuation ODU oxidation",
-                     
-                     "Surface porosity", "Deep porosity", "Porosity decay coefficient",
-                     "Formationfactor, 1=sand,2=fine sand,3=general",
-                     
-                     "relaxation towards background conc ", "height of water over core",
-                     "fall speed of organic C (FDET, SDET)", "fall speed of FeP", "fall speed of FeOH3", 
-                     "fall speed of CaP", "solve for alkalinity", 
-                     
-                     "maximal MPB production rate", "sedimentary light extinction coefficient",
-                     "DIN limitation constant MPB", 
-                     "P limitation constant MPB", 
-                     "C limitation constant MPB",
-                     
-                     "Rate of Sulphide-mediated iron reduction (oxyhydr)oxidesA",
-                     "Rate of Sulphide-mediated iron reduction (oxyhydr)oxidesB", 
-                     "Ageing of FeOx=A",
-                     "Rate of Reoxidation of Mn by Oxygen",
-                     "Rate of Reoxidation of H2S by MnOxA",
-                     "Rate of Reoxidation of H2S by MnOxB",
-                     "Ageing of MnOx=A",
-                     "Rate of Reoxidation of Fe with MnOx",
-                     "Rate of MnS formation",
-                     "Rate of MnCO3 formation",
-                     "Half saturation constant for Mn red", 
-                     "fraction fast FeOH3 in flux", 
-                     "fraction fast MnO2 in flux", 
-                     "rate of MnCO3 dissolution",
-                     "Precipitation equilibrium constant",
-                     "MnS dissolution rate", 
-                     "FeCO3 precipitation rate", 
-                     "FeCO3 dissolution rate", 
-                     "Inhibition constant for MnO2")
-
 ##------------------------------------
 ## State variables
 ##------------------------------------
@@ -266,16 +248,14 @@
                      "Fe", "FeOH3", "H2S",
                      "SO4", "CH4", "PO4",
                      "FeP", "CaP", "Pads", "ALK", "FeOH3B",
-		                  "Mn", "MnO2", "MnO2B", 
-                      "FeS", "FeS2", "S0", "MnCO3", "FeCO3", "MnS")
+		     "Mn", "MnO2", "MnO2B")
 .FESDIA$svar <- .FESDIA$ynames 
 .FESDIA$yunits <- c("mmolC/m3 solid", "mmolC/m3 solid", "mmolO/m3 liquid",
                     "mmolN/m3 liquid", "mmolN/m3 liquid", "mmolN/m3 liquid", "mmolC/m3 liquid", 
                     "mmolFe/m3 liquid", "mmolFe/m3 solid", "mmolS/m3 liquid",
-                    "mmolS/m3 liquid", "mmolC/m3 liquid", "mmolP/m3 liquid",
-                    "mmolP/m3 solid", "mmolP/m3 solid", "mmolP/m3 solid", "mmol/m3 liquid", # nolint
-		                "mmol/m3 solid", "mmol/m3 liquid", "mmol/m3 solid", "mmol/m3 solid",  # nolint
-        "mmolFe/m3 solid", "mmolFe/m3 solid", "mmolFe/m3 solid", "mmol/m3 solid", "mmolFe/m3 solid", "mmolFe/m3 solid") # nolint
+                    "mmolS/m3 liquid", "mmolCH4/m3 liquid", "mmolP/m3 liquid",
+                    "mmolP/m3 solid", "mmolP/m3 solid", "mmolP/m3 solid", "mmolALK/m3 liquid",
+		    "mmolFe/m3 solid", "mmolMn/m3 liquid", "mmolMn/m3 solid", "mmolMn/m3 solid")
 .FESDIA$ydescrip <- c("Fast decaying Detritus (solid)", 
                       "Slow decaying Detritus (solid)",
                       "Oxygen (liquid)", 
@@ -291,17 +271,11 @@
                       "Iron-bound P (solid)", 
                       "Ca-bound P (solid)", 
                       "Adsorbed P (solid)",
-                      "Alpkalinity (liquid)", 
-		                  "Crystalline Fe-oxid (solid)", 
-		                  "Mn2+ (liquid)", 
-		                  "Mn-oxide (solid)", 
-		                  "Crystalline Mn-oxide (solid)", 
-                      "Amorphous Iron oxide (FeS)", 
-                      "Pyrite (FeS2)", 
-                      "Elemental sulphur (S0)",
-                      "Manganese carbonate (MnCO3)", 
-                      "Iron carbonate (FeCO3)", 
-                      "Manganese sulfide (MnS)")
+                      "Alkalinity (liquid)", 
+		      "Crystalline Fe-oxid (solid)", 
+		      "Mn2+ (liquid)", 
+		      "Mn-oxide (solid)", 
+		      "Crystalline Mn-oxide (solid)")
 
 .FESDIA$ynamesall <- as.vector(sapply(.FESDIA$ynames, FUN = function(x) rep(x, times = .FESDIA$N)))
 
@@ -351,8 +325,7 @@
     "TotMnASC", "TotFeASC", "TotH2SoxidFe", 
     "TotH2SoxidMn", "TotAgeMnox",
     "TotAgeFeox", "TotMnCO3prec", 
-    "TotalMn", "TotalMnO2", "PartMnred", "TotFeOxidMnASC", "TotFeCO3prec", 
-    "TotMnCO3dis", "TotFeCO3dis")
+    "TotalMn", "TotalMnO2", "PartMnred", "TotFeOxidMnASC")
 
 .FESDIA$unit0D <- c("nmolO2/cm2/d", "nmolO2/cm2/d", "nmolN/cm2/d", "nmolN/cm2/d", 
       "nmolN/cm2/d", "nmolN/cm2/d", "nmolN/cm2/d", "nmolN/cm2/d", 
@@ -387,8 +360,7 @@
         "nmolFe/cm2/d", "nmolMn/cm2/d", "nmolMnS/cm2/d",
         "nmolMnOxid/cm2/d", "nmolAgeFe/cm2/d", "nmolAgeMnox/cm2/d", 
         "nmolMnCprec/cm2/d", "nmolMn/cm2/d", "nmolMnO2/cm2/d", 
-        "nmolMn/cm2/d", "nmolFe/cm2/d", "nmolFeC/cm2/d", 
-        "nmolMnC/cm2/d", "nmolFeC/cm2/d" 
+        "nmolMn/cm2/d", "nmolFe/cm2/d"
         ) 
  
 .FESDIA$descrip0D <- c("O2 influx sediment-water", "O2 efflux lower boundary", 
@@ -484,10 +456,7 @@
       "Vertically integrated Mn", 
       "Vertically integrated MnO2", 
       "Vertically integrated Manganese reduction", 
-      "Vertically integrated Fe oxidation via MnO2", 
-      "Vertically integrated FeCO3 precipitation", 
-      "Vertically integrated MnCO3 dissolution", 
-      "Vertically integrated FeCO3 dissolution")
+      "Vertically integrated Fe oxidation via MnO2")
 
 ##------------------------------------
 ## forcing functions 
