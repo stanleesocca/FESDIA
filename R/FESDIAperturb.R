@@ -91,6 +91,24 @@ Erode <- function (FDET, N.Pert, porGrid, Grid) {
    return(FDETn)
 }
 
+
+linear2listcolumn <- function(df){
+  unique_time <- unique(df[, 1])
+  res <- vector("list", length(unique_time))
+  ls_col <- data.frame()
+  for(i in 1:length(unique_time)){
+    res[[i]] <- df[df[, 1] %in% unique_time[i], ]
+    res_df <- data.frame(tindex = unique_time[i], 
+                         eventtype = I(list(res[[i]][[2]])), 
+                         pertdepth = I(list(res[[i]][[3]])), 
+                         conmat = I(list(res[[i]][1, 4:ncol(df)])))
+    
+    ls_col <- rbind.data.frame(ls_col, res_df)
+  }
+  ls_col
+}
+
+
 ## --------------------------------------------------------------------------------------------------
 ## --------------------------------------------------------------------------------------------------
 # Main FESDIA perturbation function
@@ -101,7 +119,8 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
      yini = NULL, gridtype = 1, Grid = NULL, porosity = NULL, bioturbation = NULL, 
      irrigation = NULL, surface = NULL, 
      diffusionfactor = NULL,  dynamicbottomwater = FALSE, 
-     perturbType = "deposit", perturbTimes, 
+     perturbType = "deposit", perturbTimes = NULL, 
+     perttype_mat = NULL,  
      perturbDepth = 5, concfac = NULL, 
      CfluxForc  = NULL, FeOH3fluxForc = NULL, CaPfluxForc = NULL,  
      O2bwForc   = NULL,   NO3bwForc  = NULL,  
@@ -114,8 +133,25 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
      ratefactor = NULL,  MnbwForc = NULL,     MnO2fluxForc = NULL,  
      verbose = FALSE, extmix = FALSE,...) {
   
-  # if(length(concfac) == 1) concfac <- rep(concfac, 6)
- if(is.null(concfac)) concfac <- matrix(1, nrow = length(perturbTimes), ncol = 6)
+    # if(length(concfac) == 1) concfac <- rep(concfac, 6)
+  if(is.null(concfac)) concfac <- matrix(1, nrow = length(perturbTimes), ncol = 6)
+  
+  if(is.null(perttype_mat)){
+    if(is.null(perturbTimes) || is.null(perturbType) || is.null(perturbDepth)){
+      stop("FESDIAperturb requires either data.frame with perturb time, type or depth")
+    }
+  }
+  
+  # if the perturbTimes, type or depth is given, create the perturb data.frame
+  if(is.null(perttype_mat) & (!is.null(perturbTimes) || !is.null(perturbType) || !is.null(perturbDepth))){
+    # build the perttype_mat list column (to be change later as list column is kinda complex to understand)
+    perttype_mat <- data.frame(tindex = perturbTimes, eventtype = I(list(perturbType)), 
+           pertdepth = I(list(perturbDepth)), 
+           conmat = I(list(concfac)))
+  } 
+
+  if(is.null(perturbTimes))  perturbTimes <- perttype_mat[, 1]
+
 
 ## check parameter inputs
   model <- 1
@@ -123,12 +159,6 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
   ARAGfluxForc  <- NULL
   CabwForc      <- NULL
   if (dynamicbottomwater) model <- 2
-
-  perttype <- match.arg(perturbType, c("mix", "erode", "deposit"), several.ok = TRUE)
-  if(!class(perttype) %in% c("matrix", "array")) perttype <- matrix(perttype, nrow = length(perturbTimes))
-  # if(! any(class(perturbType) %in% c("matrix", "array"))) perttype_mat <- cbind(perturbType)
-  print(environment())
-  print(ls(envir = environment()))
 
   
   CfluxForc    <- checkforcs(CfluxForc,       "CfluxForc")
@@ -212,19 +242,6 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
   tindex <- 0
   tmap <- 0
 
-  # depthPert <- perturbDepth[1]
-  # perttype =   perttype_mat[1, ]
-  # depthPert <- rep(depthPert, length.out = length(perttype))
-  # cat("Depthpert",  depthPert, "\n")
-  # N.Pert <- rep(0, times = length(depthPert))  
-  # for (i in 1:length(depthPert[1])){
-  #   N.Pert[i] <- length(Grid$x.int[Grid$x.int < depthPert[i]])
-  #   names(N.Pert) <- as.character(perttype)
-  # }
-  # ii <- which (N.Pert > 0)
-  # cat("index", ii, "\n")
-  # perttype = perttype_mat[tindex, ]
-
 
 #==============================================================================
 # Function to Perturb all states
@@ -236,56 +253,31 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
     ## The concfac and pertdepth is now given as matrix 
     ## pertdepth is a N x 1 vector 
     ## concfac is a N x length(confac) matrix
-     cat("time is: ", t, "\n")
 
-    if(t == 0){
-      # assign("tindex", 0)
-      tindex <<- 0
-      
-      depthPert <- perturbDepth[1]
-      # perttype = perttype_mat[1, ]
-      # perttype = perttype[1, ]
-
-      depthPert <- rep(depthPert, length.out = length(perttype))
-      names(depthPert) <- as.character(perttype)
-      numPert <- length(depthPert)
-
-      # cat("Depthpert: ", depthPert, "\n")
-
-      alpha <- concfac[1, ]
-      c1 = alpha[1]
-      c2 = alpha[2]
-      c3 = alpha[3]
-      c4 = alpha[4]
-      c5 = alpha[5]
-      c6 = alpha[6]
-    }
-
-
-    if(t != 0){
-      cat("time is: ", t, "\n")
-
-      # assign("tindex", tindex + 1)
       tindex <<- tindex + 1
-      
-      # cat("tindex ", tindex, "\n")
+  
 
-      depthPert <- perturbDepth[tindex]
-      # cat("perttype", perttype, "\n")
-      # pp_type = perttype[tindex, ]
+      # depthPert <- perturbDepth[tindex]
+      depthPert <- as.vector(unlist(perttype_mat[tindex, 3]))
+      
+      # perttype = perttype_mat[tindex, ]
+      perttype = as.vector(unlist(perttype_mat[tindex, 2]))
+      cat(perttype)
       # cat("pp_type", pp_type, "\n")
       depthPert <- rep(depthPert, length.out = length(perttype))
       names(depthPert) <- as.character(perttype)
       numPert <- length(depthPert)
 
-      alpha <- concfac[tindex, ]
+      # alpha <- concfac[tindex, ]
+      alpha <- as.vector(unlist(perttype_mat[tindex, 4]))
+      # alpha <- as.vector(unlist(perttype_mat[tindex, 4:ncol(perttype_mat)]))
       c1 = alpha[1]
       c2 = alpha[2]
       c3 = alpha[3]
       c4 = alpha[4]
       c5 = alpha[5]
       c6 = alpha[6]
-    }
+    # }
 
     # Number of layers that are perturbed 
     # Note: there can be more than one type of perturbation 
@@ -478,12 +470,11 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
     
       }
     return(pertCONC)
-  }
+   }
 
 #===============================================================================
 # Event Function
 #===============================================================================
-
   EventFunc <- function(t, y, parms){
      print (paste("event at time", t))
     # tindex <<- tindex + 1
