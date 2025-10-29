@@ -269,8 +269,8 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
       numPert <- length(depthPert)
 
       # alpha <- concfac[tindex, ]
-      alpha <- as.vector(unlist(perttype_mat[tindex, 4]))
-      # alpha <- as.vector(unlist(perttype_mat[tindex, 4:ncol(perttype_mat)]))
+      #alpha <- as.vector(unlist(perttype_mat[tindex, 4]))
+      alpha <- as.vector(unlist(perttype_mat[tindex, 4:ncol(perttype_mat)]))
       c1 = alpha[1]
       c2 = alpha[2]
       c3 = alpha[3]
