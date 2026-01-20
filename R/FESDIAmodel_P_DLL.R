@@ -96,8 +96,8 @@ initFESDIA <- function (parms = list(), gridtype = 1, CfluxForc = NULL,
   }
   
   if (Parms[["BCdownLiq"]] != 3) {
-    if (any(is.na(Parms[[c("O2dw","NO3dw","NO2dw","NH3dw","CH4dw","Fedw",
-                           "SO4dw","PO4dw","DICdw","ALKdw","Mndw")]])))
+    if (any(is.na(Parms[c("O2dw","NO3dw","NO2dw","NH3dw","CH4dw","Fedw",
+                           "SO4dw","PO4dw","DICdw","ALKdw","Mndw")])))
       stop("deep water concentrations cannot be NA if type flux or concentration")
 
     if (dynamicpH & is.na(Parms[["Cadw"]]))
