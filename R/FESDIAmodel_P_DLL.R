@@ -34,7 +34,7 @@ initFESDIA <- function (parms = list(), gridtype = 1, CfluxForc = NULL,
       if (! "dx.aux" %in%  nms)
           stop ("'Grid' should be a list containing 'dx' and 'dx.aux'")
       if (length(Grid$dx.aux) != .FESDIA$N +1)
-            stop ("Checking 'Grid': 'dx.aux' should be a vector of length ", .FESDIA$N+1)
+            stop ("Checking 'Grid': 'dx.aux' should be a vector of length ", .FESDIA$N)
       if (length(Grid$dx) != .FESDIA$N +1)
           stop ("Checking 'Grid': 'dx' should be a vector of length ", .FESDIA$N)
     } else {
