@@ -282,7 +282,7 @@ FESDIAperturbSettings and FESDIAperturbFluxes retrieve the settings and perturba
 <span class="r-in"><span><span class="co"># ========================================</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">FESDIAperturb</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in FESDIAperturb():</span> argument "perturbTimes" is missing, with no default</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in FESDIAperturb():</span> FESDIAperturb requires either data.frame with perturb time, type or depth</span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">3</span>,<span class="fl">3</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  </span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/plot3D/man/Image.html" class="external-link">image2D</a></span><span class="op">(</span><span class="va">out</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span>, which <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -294,32 +294,13 @@ FESDIAperturbSettings and FESDIAperturbFluxes retrieve the settings and perturba
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">out2</span> <span class="op">&lt;-</span> <span class="fu">FESDIAperturb</span><span class="op">(</span>perturbTime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">300</span><span class="op">)</span>,      </span></span>
 <span class="r-in"><span>    perturbType <span class="op">=</span> <span class="st">"mix"</span>, perturbDepth <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001c186137498&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "ALKbwForc"          "ARAGfluxForc"       "CH4bwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "CaCO3fluxForc"      "CaPfluxForc"        "CabwForc"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "CfluxForc"          "DICbwForc"          "FeOH3fluxForc"     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "FebwForc"           "Grid"               "H2SbwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "HwaterForc"         "MPBprodForc"        "MnO2fluxForc"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16] "MnbwForc"           "NH3bwForc"          "NO2bwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "NO3bwForc"          "O2bwForc"           "PO4bwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22] "SO4bwForc"          "biotForc"           "bioturbation"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25] "concfac"            "diffusionfactor"    "dynamicbottomwater"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [28] "extmix"             "gasfluxForc"        "gridtype"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31] "irrForc"            "irrigation"         "model"             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [34] "pFastForc"          "parms"              "perttype"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] "perturbDepth"       "perturbTimes"       "perturbType"       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [40] "porosity"           "rFastForc"          "rSlowForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [43] "ratefactor"         "spinup"             "surface"           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [46] "times"              "verbose"            "wForc"             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [49] "yini"              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Finish spinup!</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> tindex after spinup:  0 </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (TotalFdet2 &gt; 0) Fac &lt;- TotalFdet/TotalFdet2 else Fac &lt;- 1:</span> missing value where TRUE/FALSE needed</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/plot3D/man/Image.html" class="external-link">image2D</a></span><span class="op">(</span><span class="va">out2</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span>, which <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'out2' not found</span>
+<span class="r-plt img"><img src="FESDIAperturb-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="FESDIAbudget.html">FESDIAbudgetO2</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span>  </span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'out' not found</span>
@@ -330,38 +311,74 @@ FESDIAperturbSettings and FESDIAperturbFluxes retrieve the settings and perturba
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">out3</span> <span class="op">&lt;-</span> <span class="fu">FESDIAperturb</span><span class="op">(</span>perturbTime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">300</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>    perturbType <span class="op">=</span> <span class="st">"erode"</span>, perturbDepth <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001c1830b6388&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "ALKbwForc"          "ARAGfluxForc"       "CH4bwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "CaCO3fluxForc"      "CaPfluxForc"        "CabwForc"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "CfluxForc"          "DICbwForc"          "FeOH3fluxForc"     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "FebwForc"           "Grid"               "H2SbwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "HwaterForc"         "MPBprodForc"        "MnO2fluxForc"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16] "MnbwForc"           "NH3bwForc"          "NO2bwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "NO3bwForc"          "O2bwForc"           "PO4bwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22] "SO4bwForc"          "biotForc"           "bioturbation"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25] "concfac"            "diffusionfactor"    "dynamicbottomwater"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [28] "extmix"             "gasfluxForc"        "gridtype"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31] "irrForc"            "irrigation"         "model"             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [34] "pFastForc"          "parms"              "perttype"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] "perturbDepth"       "perturbTimes"       "perturbType"       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [40] "porosity"           "rFastForc"          "rSlowForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [43] "ratefactor"         "spinup"             "surface"           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [46] "times"              "verbose"            "wForc"             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [49] "yini"              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Finish spinup!</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> tindex after spinup:  0 </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in approx(x = NewGrid, y = FDETerode, xout = Grid$x.mid):</span> need at least two non-NA values to interpolate</span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/plot3D/man/Image.html" class="external-link">image2D</a></span><span class="op">(</span><span class="va">out3</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span>, which <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'out3' not found</span>
+<span class="r-plt img"><img src="FESDIAperturb-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span> </span></span>
 <span class="r-in"><span>  <span class="va">PertFluxes</span> <span class="op">&lt;-</span> <span class="fu">FESDIAperturbFluxes</span><span class="op">(</span><span class="va">out3</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'out3' not found</span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">PertFluxes</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'PertFluxes' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          time      FDET        SDET        O2        NO3       NO2       NH3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes      0 -6000.000 -269844.904 -101.8914  -38.55880 -2.093360  76.28688</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.1  100 -5993.637  -67047.534 -156.7065 -106.06732 -1.307491 102.24838</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.2  200 -5993.638   -4645.748 -212.0603  -99.67987 -1.260267 102.18975</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.3  300 -5993.639   -4535.077 -215.9676  -99.63418 -1.260093 102.17800</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               DIC          Fe FeOH3 H2S      SO4          CH4        PO4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes   14.98051 -2.01725173     0   0 1255.795 -1.037216892 -468.51131</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.1 21.34133 -0.01315744     0   0 1818.565 -0.003898525  -46.65665</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.2 23.00958 -0.01174310     0   0 1965.826 -0.002565093  -46.12171</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.3 23.24754 -0.01166853     0   0 1987.566 -0.002366882  -45.97766</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               FeP       CaP          Pads      ALK     FeOH3B          Mn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes   294.6013 -550.0215 -1.417194e-01 1202.401 -300.33600 -0.88673412</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.1 411.5000 -745.2026 -4.776186e-08 1726.905  -51.87704 -0.07212761</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.2 432.4354 -780.7182  8.161086e-10 1782.063  -52.47637 -0.05841643</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.3 437.7559 -789.6059 -4.488932e-10 1798.644  -52.63301 -0.05539542</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               MnO2      MnO2B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes   -50.69216 -253.21829</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.1 -31.49712  -57.01200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.2 -31.80519  -57.56227</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fluxes.3 -31.86271  -57.70268</span>
 <span class="r-in"><span>  <span class="fu">FESDIAperturbSettings</span><span class="op">(</span><span class="va">out3</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'out3' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbType</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbType[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "erode"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbType[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "erode"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbType[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "erode"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbType[[4]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "erode"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbTimes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   0 100 200 300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbDepth</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbDepth[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbDepth[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbDepth[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $perturbDepth[[4]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $concfac</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1    1    1    1    1    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]    1    1    1    1    1    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]    1    1    1    1    1    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]    1    1    1    1    1    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ========================================</span></span></span>
 <span class="r-in"><span><span class="co"># Several subsequent perturbations</span></span></span>
@@ -369,39 +386,19 @@ FESDIAperturbSettings and FESDIAperturbFluxes retrieve the settings and perturba
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">out4</span> <span class="op">&lt;-</span> <span class="fu">FESDIAperturb</span><span class="op">(</span>perturbTime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">300</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>     perturbType <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mix"</span>, <span class="st">"erode"</span><span class="op">)</span>, perturbDepth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x000001c17c19be70&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "ALKbwForc"          "ARAGfluxForc"       "CH4bwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "CaCO3fluxForc"      "CaPfluxForc"        "CabwForc"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "CfluxForc"          "DICbwForc"          "FeOH3fluxForc"     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10] "FebwForc"           "Grid"               "H2SbwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "HwaterForc"         "MPBprodForc"        "MnO2fluxForc"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16] "MnbwForc"           "NH3bwForc"          "NO2bwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "NO3bwForc"          "O2bwForc"           "PO4bwForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22] "SO4bwForc"          "biotForc"           "bioturbation"      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25] "concfac"            "diffusionfactor"    "dynamicbottomwater"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [28] "extmix"             "gasfluxForc"        "gridtype"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31] "irrForc"            "irrigation"         "model"             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [34] "pFastForc"          "parms"              "perttype"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] "perturbDepth"       "perturbTimes"       "perturbType"       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [40] "porosity"           "rFastForc"          "rSlowForc"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [43] "ratefactor"         "spinup"             "surface"           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [46] "times"              "verbose"            "wForc"             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [49] "yini"              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Finish spinup!</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> tindex after spinup:  0 </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (TotalFdet2 &gt; 0) Fac &lt;- TotalFdet/TotalFdet2 else Fac &lt;- 1:</span> missing value where TRUE/FALSE needed</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/plot3D/man/Image.html" class="external-link">image2D</a></span><span class="op">(</span><span class="va">out4</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0</span><span class="op">)</span>, which <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'out4' not found</span>
+<span class="r-plt img"><img src="FESDIAperturb-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">pH</span> <span class="op">&lt;-</span> <span class="fu"><a href="FESDIAvars.html">FESDIApH</a></span><span class="op">(</span><span class="va">out4</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'out4' not found</span>
 <span class="r-in"><span>  <span class="fu">plot3D</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plot3D/man/Image.html" class="external-link">image2D</a></span><span class="op">(</span><span class="va">pH</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>,<span class="fl">0</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="FESDIAparms.html">FESDIAdepth</a></span><span class="op">(</span><span class="va">out4</span><span class="op">)</span>, x <span class="op">=</span> <span class="va">out4</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'pH' not found</span>
 <span class="r-in"><span></span></span>
+<span class="r-plt img"><img src="FESDIAperturb-4.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
