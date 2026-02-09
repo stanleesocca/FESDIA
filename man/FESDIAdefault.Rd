@@ -16,8 +16,8 @@
 # defaults
   head(FESDIAparms(FESDIAdefault, as.vector = TRUE)) 
 #        FESDIAparms(FESDIAdefault2))
-  plot(FESDIAdefault, xyswap = TRUE, ylim = c(30, 0),
-    mfrow = c(4,4), grid = FESDIAdepth(FESDIAdefault))
+#  plot(FESDIAdefault, xyswap = TRUE, ylim = c(30, 0),
+#    mfrow = c(5,4), grid = FESDIAdepth(FESDIAdefault))
   
 }
 

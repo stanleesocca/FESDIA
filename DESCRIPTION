@@ -1,11 +1,18 @@
 Package: FESDIA
 Version: 1.0
 Title: Diagenetic model including Fe, S and CH4 dynamics
-Author: Karline Soetaert <karline.soetaert@nioz.nl>
-Maintainer: Karline Soetaert <karline.soetaert@nioz.nl>
+Authors@R: c(
+    person("Karline", "Soetaert", , "karline.soetaert@nioz.nl", role = c("aut", "cre")
+    ),
+    person("Stanley", "Nmor", role = c("aut"),
+    )
+  )
 Depends: R (>= 4.0),deSolve, rootSolve, plot3D
 Imports: marelac, ReacTran, AquaEnv, methods
 Description: Early diagenetic model with C, N, O, P, S, Fe-dynamics.
 License: GPL (>=3.0)
 LazyData: yes
-
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

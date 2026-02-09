@@ -28,7 +28,7 @@ MixDET <- function (FDET, N.Pert, porGrid, Grid) {
    TotalFdet2 <- sum(MeanFdet *
                   (1.-porGrid$mid[1:N.Pert]) * Grid$dx[1:N.Pert])
 
-  # browser()
+  browser()
    if (TotalFdet2 > 0 )
      Fac <- TotalFdet / TotalFdet2
    else
@@ -115,7 +115,13 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
      verbose = FALSE, extmix = FALSE,...) {
   
   # if(length(concfac) == 1) concfac <- rep(concfac, 6)
- if(is.null(concfac)) concfac <- matrix(1, nrow = length(perturbTimes), ncol = 6)
+#  if(is.null(concfac)) concfac <- matrix(1, nrow = length(perturbTimes), ncol = 6)
+ if(is.null(concfac)) {
+    concfac <- matrix(1, nrow = length(perturbTimes), ncol = 6)
+ } else if(length(concfac) == 1) {
+    concfac <- rep(concfac, 6)
+ }
+  
 
 ## check parameter inputs
   model <- 1

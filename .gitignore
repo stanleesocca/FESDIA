@@ -1,0 +1,4 @@
+docs
+src/*.o
+src/*.mod
+src/*.dll

@@ -1,4 +1,5 @@
-# GMD-JGR-FESDIA
+# FESDIA <img src="man/figures/logo.png" align="right" height="138" alt="" />
+
 This is a published version of FESDIA. The archived version of FESDIA is hosted in zenodo as DOI. See [zenodo page](https://doi.org/10.5281/zenodo.15479943) for reference. 
 
 ## Installation
