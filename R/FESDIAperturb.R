@@ -133,44 +133,36 @@ FESDIAperturb <- function (parms = list(), times = 0:365, spinup = NULL,
      ratefactor = NULL,  MnbwForc = NULL,     MnO2fluxForc = NULL,  
      verbose = FALSE, extmix = FALSE,...) {
   
-    # if(length(concfac) == 1) concfac <- rep(concfac, 6)
-  if(is.null(concfac)) {
-    concfac <- matrix(1, nrow = length(perturbTimes), ncol = 6)
-  } else if(length(concfac) == 1) {
-    concfac <- rep(concfac, 6)
+  if(is.null(perturbTimes) && is.null(perttype_mat)){
+     stop("FESDIAperturb requires either data.frame with perturb time, type or depth")
   }
   
-  if(is.null(perttype_mat)){
-    if(is.null(perturbTimes) || is.null(perturbType) || is.null(perturbDepth)){
-      stop("FESDIAperturb requires either data.frame with perturb time, type or depth")
+  # Data already comes in the list-column format 
+  if(!is.null(perttype_mat)){
+    perturbTimes <- perttype_mat[, 1]
+    perturbType <- perttype_mat[, 2]
+    perturbDepth <- perttype_mat[, 3]
+    concfac      <- perttype_mat[, 4]
+  } else {
+  # Data comes as a vector. Need to build the list column format
+    if(is.null(concfac)) {
+      concfac <- matrix(1, nrow = length(perturbTimes), ncol = 6)
+    } else if(length(concfac) == 1) {
+      concfac <- rep(concfac, 6)
     }
-  }
+
+    nperttime <- length(perturbTimes)
   
-  # if the perturbTimes, type or depth is given, create the perturb data.frame
-  # if(is.null(perttype_mat) & (!is.null(perturbTimes) || !is.null(perturbType) || !is.null(perturbDepth))){
-  #   # build the perttype_mat list column (to be change later as list column is kinda complex to understand)
-  #   perttype_mat <- data.frame(tindex = perturbTimes, eventtype = I(list(perturbType)), 
-  #          pertdepth = I(list(perturbDepth)), 
-  #          conmat = I(list(concfac)))
-  # }
+    if(length(perturbDepth) != nperttime) perturbDepth <- replicate(nperttime, perturbDepth, FALSE)
+    if(is.null(nrow(concfac)) || nrow(concfac) != nperttime) concfac = replicate(nperttime, concfac, FALSE)
+    if(is.null(nrow(perturbType)) || nrow(perturbType) != nperttime ) perturbType = replicate(nperttime, perturbType, FALSE)
   
-  
-  nperttime <- length(perturbTimes)
-  
-  
-  if(length(perturbDepth) != nperttime) perturbDepth <- replicate(nperttime, perturbDepth, FALSE)
-  if(is.null(nrow(concfac)) || nrow(concfac) != nperttime) concfac = replicate(nperttime, concfac, FALSE)
-  if(is.null(nrow(perturbType)) || nrow(perturbType) != nperttime ) perturbType = replicate(nperttime, perturbType, FALSE)
-  
-  perttype_mat <- data.frame(tindex = perturbTimes, eventtype = I(perturbType), 
+    perttype_mat <- data.frame(tindex = perturbTimes, eventtype = I(perturbType), 
                     pertdepth = I(perturbDepth), 
                     conmat = I(concfac)
-  )
+                    )
+  }
   
-
-  if(is.null(perturbTimes))  perturbTimes <- perttype_mat[, 1]
-
-
 ## check parameter inputs
   model <- 1
   CaCO3fluxForc <- NULL
